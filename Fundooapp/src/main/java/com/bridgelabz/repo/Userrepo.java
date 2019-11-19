@@ -1,3 +1,16 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Userrepo.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create repository class for db connection with mongo database
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  19-11-2019
+ *
+ ******************************************************************************/
+
 package com.bridgelabz.repo;
 
 
@@ -11,7 +24,7 @@ import com.bridgelabz.model.User;
 public interface Userrepo extends MongoRepository<User, Object> {  //create interface for mongodb repository use it
 	
 	
-	public User findByEmail(String email);
+	public User findByEmail(String email);   // find  user email
 	
 	
 

@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Service.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create   interface for  perform all operation
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since   19-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.services;
 
 
@@ -10,7 +22,8 @@ import com.bridgelabz.dto.Logindto;
 import com.bridgelabz.dto.Registerdto;
 import com.bridgelabz.dto.Setpassworddto;
 import com.bridgelabz.model.User;
-import com.sun.mail.iap.Response;
+import com.bridgelabz.response.Response;
+
 
 public interface Service {
 	
@@ -20,15 +33,15 @@ public interface Service {
 	
 	public  String loginUser(Logindto logindto);        //create loginUser() method for login user
 	
-	public Optional<User> findByUser( int id);          //create findByUser() method for check user detail present or not
+	public Optional<User> findByUser( String id);          //create findByUser() method for check user detail present or not
 	
 	public List<User> Show();                           // create Show() method for display all user details
 	
-	public String deleteUser(int id);                   //create deleteUser() method for remove particular user
+	public String deleteUser(String id);                   //create deleteUser() method for remove particular user
 	
-	public String updateuser(User user,  int id);       //create UpdateUser() method for update particular user
+	public String updateuser(User user,  String id);       //create UpdateUser() method for update particular user
 	 
-	public Response forgetPassword(Forgotdto forgetDto); //create forgetPassword() method for change particular user email
+	public Response findEmail(String email); //create findEmail() method for change particular user email
 	
 	
 	public Response setPassword(Setpassworddto setPasswordDto,String token);

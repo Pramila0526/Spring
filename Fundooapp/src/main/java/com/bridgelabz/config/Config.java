@@ -1,3 +1,17 @@
+
+/******************************************************************************
+ *  Compilation:  javac -d bin modelmapper.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       main purpose this class create for configuration modelmapper
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since   19-11-2019
+ *
+ ******************************************************************************/
+
 package com.bridgelabz.config;
 
 import org.modelmapper.ModelMapper;
