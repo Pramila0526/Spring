@@ -11,7 +11,7 @@ public class App
 {
     public static void main( String[] args )
     {
-       ApplicationContext context=new ClassPathXmlApplicationContext("aop.xml");
+       ApplicationContext context=new ClassPathXmlApplicationContext("aop.xml");   //application context type of  IOC container
        Student s=(Student) context.getBean("student");
        s.getName();
        s.getAge();
