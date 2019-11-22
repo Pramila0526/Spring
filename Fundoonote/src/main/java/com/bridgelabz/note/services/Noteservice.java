@@ -10,7 +10,7 @@ public interface Noteservice {
 	
 	
 	
-	public void createNote(Notedto notedto);
+	public void createNote(Notedto notedto,String token);
 	public String deleteNote(String id);
 	public void UpdateNote(Notedto notedto,String id);
 	public Optional<Notemodel> searchNote(String id);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.note.dto.Notedto;
-import com.bridgelabz.note.model.Notemodel;
+
 import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.services.MessageReference;
 import com.bridgelabz.note.services.NoteserviceImp;
@@ -24,10 +24,11 @@ public class Notecontroller {
 	NoteserviceImp noteServiceImp;
 
 	@PostMapping("/addNote")
-	public Response createNote(@RequestBody Notedto notedto) {
+	public Response createNote(@RequestBody Notedto notedto,@RequestParam String token) {
 
-		System.out.println("IN Controller");
-		noteServiceImp.createNote(notedto);
+		
+		System.out.println("token:"+token);
+		noteServiceImp.createNote(notedto,token);
 
 		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
 
@@ -57,9 +58,10 @@ public class Notecontroller {
 	public Response updateNote(@RequestBody Notedto notedto, @RequestParam String id) {
 		
 	
-          System.out.println(notedto.getColor());
+          
 		  noteServiceImp.UpdateNote(notedto, id);
 		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
 	}
+	 
 
 }

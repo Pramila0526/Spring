@@ -1,11 +1,11 @@
 package com.bridgelabz.note.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.datetime.standard.DateTimeContext;
+
 
 import lombok.Data;
 
@@ -25,16 +25,18 @@ public class Notemodel {
 	private boolean pin;
 	private boolean trash;
 	private boolean archive;
-	private boolean remider;
+	private boolean remider;	
+	private LocalDateTime updateDate;
+	private LocalDateTime createDate;
 	
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-	private Date createdDate = new Date();
+	private String user_id;
+
 
 	@Override
 	public String toString() {
 		return "Notemodel [id=" + id + ", title=" + title + ", description=" + description + ", color=" + color
 				+ ", pin=" + pin + ", trash=" + trash + ", archive=" + archive + ", remider=" + remider
-				+ ", createdDate=" + createdDate + "]";
+				+ ", createDate=" + createDate + "]"+ ", updateDate=" + updateDate + "]";
 	}
 	
 	
