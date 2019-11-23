@@ -15,6 +15,9 @@ package com.bridgelabz.utility;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 
+import com.bridgelabz.model.Rabbitmqmodel;
+import com.bridgelabz.services.MessageReference;
+
 
 
 @Component
@@ -39,5 +42,20 @@ public class Utility {
 		return msg;
 
 	}
+	
+	
+	public static Rabbitmqmodel  getRabbitMq(String email ,String token) {
+		
+		Rabbitmqmodel rm=new Rabbitmqmodel();
+		rm.setBody(MessageReference.REGISTRATION_MAIL_TEXT+token);
+		rm.setEmail(email);
+		rm.setSubject("Verfication link");
+		return rm;
+		
+		
+		
+	}
+	
+	
 
 }

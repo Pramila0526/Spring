@@ -2,6 +2,7 @@ package com.bridgelabz.note.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.bridgelabz.note.dto.Labeldto;
 import com.bridgelabz.note.model.Labelmodel;
+import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.repo.Labelrepository;
+import com.bridgelabz.note.repo.Noterepository;
 import com.bridgelabz.note.utility.Tokenutility;
 
 @Component
@@ -22,6 +25,9 @@ public class LabelserviceImp implements Labelservice {
 	
 	@Autowired
 	Labelrepository labelRepo;
+	
+	@Autowired
+	Noterepository noteRepo;
 	
 	@Autowired
 	Tokenutility tokenUtility;
@@ -84,6 +90,36 @@ public class LabelserviceImp implements Labelservice {
 		
 		System.out.println(user_id);
 		return (ArrayList<Labelmodel>) labelRepo.findByUserid(user_id);
+	}
+
+	@Override
+	public String assignNote(String noteid, String labelid) {
+		
+		Labelmodel label=labelRepo.findById(labelid).get();
+		if(label==null)
+		{
+		 return "label id not found";
+		}
+		Notemodel note=noteRepo.findById(noteid).get();
+		if(note==null)
+		{
+		 return "label id not found";
+		}
+		List<Notemodel> notelist=new ArrayList<Notemodel>();
+		List<Labelmodel> labellist=new ArrayList<Labelmodel>();
+	
+		 
+		labellist.add(label);
+		notelist.add(note);
+		
+		label.setListOfNote(label.getListOfNote());
+		note.setListOfLabels(note.getListOfLabels());
+	  	
+		 labelRepo.save(label);
+	  	 noteRepo.save(note);
+	  	 
+	  	 return "sucess";
+		 
 	}
 
 	

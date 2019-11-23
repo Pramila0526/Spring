@@ -16,6 +16,7 @@ public interface Labelservice {
 	public Optional<Labelmodel> labelSearch(String id);
 	
 	public ArrayList<Labelmodel> findLabelByUser_id(String user_id);
+	public String assignNote(String noteid,String labelid);
 	
 
 }

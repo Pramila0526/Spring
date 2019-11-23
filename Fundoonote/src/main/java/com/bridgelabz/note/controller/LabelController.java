@@ -69,6 +69,13 @@ public class LabelController {
 		return new Response(200, "lable find by user_id", lableServiceImp.findLabelByUser_id(userid));
 	}
 	
+	@PostMapping("/assignnote")
+	public Response assignNote(@RequestParam String noteid,@RequestParam String labelid) {
+		
+		
+		return new Response(200, "assign note",lableServiceImp.assignNote(noteid, labelid));
+	}
+	
 	
 	
 	

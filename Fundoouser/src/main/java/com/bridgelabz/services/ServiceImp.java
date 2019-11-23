@@ -18,6 +18,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,7 @@ import com.bridgelabz.exception.Custom.Forgotpasswordexception;
 import com.bridgelabz.exception.Custom.Registrationexcepton;
 import com.bridgelabz.exception.Custom.Validateuserexception;
 import com.bridgelabz.exception.Custom.Deleteexception;
+import com.bridgelabz.model.Rabbitmqmodel;
 import com.bridgelabz.model.User;
 import com.bridgelabz.repo.Userrepo;
 import com.bridgelabz.response.Response;
@@ -40,7 +42,7 @@ import com.bridgelabz.utility.Utility;
 public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Autowired
-	Userrepo repo;    //create object user repo
+    private 	Userrepo repo;    //create object user repo
 
 	@Autowired
 	private JavaMailSender javaMailSender;  //  use JavaMailSender class
@@ -49,13 +51,17 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	private PasswordEncoder passwordConfig;   // create object  passwordencoder class
 
 	@Autowired
-	Tokenutility tokenutility;      // create object for tokenutility
+	private Tokenutility tokenutility;      // create object for tokenutility
 
 	@Autowired
-	Passwordconfig confing;      // create  object for  confing
+	private Passwordconfig confing;      // create  object for  confing
 
 	@Autowired
 	ModelMapper mapper;         // user modelmapper for store data 
+	
+	
+	@Autowired
+	RabbitTemplate template;
 
 	
 	
@@ -86,6 +92,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 		
 		String token = tokenutility.createToken(user.getId());
+		Rabbitmqmodel body = Utility.getRabbitMq( regdto.getEmail(),token);
+		template.convertAndSend("userMessageQueue", body);
+		//javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
 		javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token, MessageReference.REGISTRATION_MAIL_TEXT));   //send  verify link message in user email id
         
 		return MessageReference.USER_ADD_SUCCESSFULLY;

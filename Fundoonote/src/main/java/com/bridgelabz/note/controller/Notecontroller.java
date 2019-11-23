@@ -62,6 +62,11 @@ public class Notecontroller {
 		  noteServiceImp.UpdateNote(notedto, id);
 		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
 	}
+	@GetMapping("/sortnotebyname")
+	public Response sortNoteByName() {
+		
+		return new Response(200, "Sort note by name",noteServiceImp.sortNoteByName() );
+	}
 	 
 
 }

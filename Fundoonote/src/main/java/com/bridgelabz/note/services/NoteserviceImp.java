@@ -3,6 +3,8 @@ package com.bridgelabz.note.services;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +104,18 @@ public class NoteserviceImp implements Noteservice {
 	    repo.save(updateNote);
 		
 		
+	}
+
+
+
+
+	@Override
+	public List<Notemodel> sortNoteByName() {
+		   
+		List<Notemodel> note=showAllNote();
+	
+		return (List<Notemodel>) note.stream().sorted((note1,note2) -> note1.getTitle().compareTo(note2.getTitle())).collect(Collectors.toList());
+				
 	}
 
 }

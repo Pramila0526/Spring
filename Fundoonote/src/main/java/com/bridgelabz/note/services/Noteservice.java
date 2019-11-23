@@ -15,6 +15,7 @@ public interface Noteservice {
 	public void UpdateNote(Notedto notedto,String id);
 	public Optional<Notemodel> searchNote(String id);
     public List<Notemodel> showAllNote();
+    public List<Notemodel> sortNoteByName();
 //	
 
 }

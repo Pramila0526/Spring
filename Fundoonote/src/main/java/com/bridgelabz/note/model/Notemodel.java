@@ -1,15 +1,17 @@
 package com.bridgelabz.note.model;
 
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
 import lombok.Data;
 
-@Document
+@Document(collection = "note")
 
 @Data
 public class Notemodel {
@@ -30,6 +32,9 @@ public class Notemodel {
 	private LocalDateTime createDate;
 	
 	private String user_id;
+	@DBRef
+	List<Labelmodel> listOfLabels=new ArrayList<Labelmodel>();
+	
 
 
 	@Override
