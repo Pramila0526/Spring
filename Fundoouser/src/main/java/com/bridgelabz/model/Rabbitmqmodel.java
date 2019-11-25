@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Rabbitmqmodel.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create rabbitmq model using  lombok
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  25-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.model;
 
 import java.io.Serializable;

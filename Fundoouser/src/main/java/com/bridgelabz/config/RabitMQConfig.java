@@ -1,3 +1,16 @@
+
+/******************************************************************************
+ *  Compilation:  javac -d bin RabitMQConfig.java
+ *  Execution:   
+ *               
+ *  
+ *  Purpose:     Main purpose this class   RabitMQ configuration
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  25-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.config;
 
 import org.springframework.amqp.core.BindingBuilder;

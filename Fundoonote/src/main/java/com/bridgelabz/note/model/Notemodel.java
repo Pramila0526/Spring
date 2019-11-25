@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Tokenutility.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create utility for jwt  response in  token
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  19-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.note.model;
 
 import java.time.LocalDateTime;
@@ -11,6 +23,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 
+/**
+ * purpose  create  note model
+ *
+ */
 @Document(collection = "note")
 
 @Data
@@ -18,22 +34,23 @@ public class Notemodel {
 	
 	
 	@Id
-	private String id;
+	private String id;   
 	
 	
-	private String title;
+	private String title;  
 	private String  description;
 	private String color;
 	private boolean pin;
 	private boolean trash;
 	private boolean archive;
 	private boolean remider;	
-	private LocalDateTime updateDate;
-	private LocalDateTime createDate;
 	
-	private String user_id;
+	private LocalDateTime date;
+	
+	private String userid;
+	private List<String > collabrators=new  ArrayList<String>(); //list use for collaborators other person
 	@DBRef
-	List<Labelmodel> listOfLabels=new ArrayList<Labelmodel>();
+	List<Labelmodel> listOfLabels=new ArrayList<Labelmodel>(); //this list use for relationship between note and label
 	
 
 
@@ -41,7 +58,7 @@ public class Notemodel {
 	public String toString() {
 		return "Notemodel [id=" + id + ", title=" + title + ", description=" + description + ", color=" + color
 				+ ", pin=" + pin + ", trash=" + trash + ", archive=" + archive + ", remider=" + remider
-				+ ", createDate=" + createDate + "]"+ ", updateDate=" + updateDate + "]";
+				+  ", date=" + date + "]";
 	}
 	
 	

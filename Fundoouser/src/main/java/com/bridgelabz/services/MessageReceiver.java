@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin MessageReceiver.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:     main purpose of this class is send  email and fetch all detail from that body
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since   25-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.services;
 
 import org.springframework.beans.factory.annotation.Autowired;

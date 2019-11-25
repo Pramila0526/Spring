@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Tokenutility.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create utility for jwt  response in  token
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  19-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.note.model;
 
 import java.time.LocalDateTime;
@@ -19,11 +31,11 @@ public class Labelmodel {
 	private String lable_title;
 	private LocalDateTime created_date;
 	private LocalDateTime updated_date;	
-	private String userid;
+	private String userid;     //add db in user id
 	
 	
 	@DBRef(lazy = true)
-	List<Notemodel> listOfNote=new ArrayList<Notemodel>();
+	List<Notemodel> listOfNote=new ArrayList<Notemodel>();   //create this list for many to many relationship between two class
 	@Override
 	public String toString() {
 		return "Labelmodel [label_id=" + label_id + ", lable_title=" + lable_title + ", created_date=" + created_date

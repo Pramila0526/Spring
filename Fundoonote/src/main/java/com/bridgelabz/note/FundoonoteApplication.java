@@ -8,7 +8,7 @@ public class FundoonoteApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FundoonoteApplication.class, args);
-		System.out.println("main class");
+		
 	}
 
 }

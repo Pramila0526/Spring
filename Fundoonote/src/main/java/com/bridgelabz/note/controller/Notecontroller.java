@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Tokenutility.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create utility for jwt  response in  token
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  19-11-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.note.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
 
 import com.bridgelabz.note.response.Response;
@@ -67,6 +80,18 @@ public class Notecontroller {
 		
 		return new Response(200, "Sort note by name",noteServiceImp.sortNoteByName() );
 	}
+	@GetMapping("/sortnotebynote")
+	public Response sortNoteByDate() {
+		     System.out.println("in controller");
+		
+		return new Response(200, "Sort note by Date",noteServiceImp.sortNoteByDate() );
+	}
+	@GetMapping("/addcollbrator")
+	public  Response addCollbrator( @RequestBody Collabratordto collabratorDto) {
+		
+		return new Response(200, "add collbrator", noteServiceImp.addCollabrator(collabratorDto) );
+	}
+	
 	 
 
 }
