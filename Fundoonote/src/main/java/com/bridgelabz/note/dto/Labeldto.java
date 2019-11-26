@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class Labeldto {
 	
-	private String lable_title;
+	private String lable_title;   //create label title
 		
 
 }

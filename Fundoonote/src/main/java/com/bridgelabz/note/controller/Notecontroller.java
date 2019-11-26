@@ -1,9 +1,16 @@
 /******************************************************************************
- *  Compilation:  javac -d bin Tokenutility.java
- *  Execution:    
+ *  Compilation:    javac -d bin Notecontroller.java
+ *  Execution:      java -cp bin com.bridgelabz.Noteserviceimp.createNote    notedto , token
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.deleteNote    id
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.searchNote    id
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.UpdateNote    notedto  id
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.showAllNote   
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.sortNoteByName   
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.sortNoteByDate    
+ *                  java -cp bin com.bridgelabz.Noteserviceimp.addCollabrator collabratorDto    
  *               
  *  
- *  Purpose:       create utility for jwt  response in  token
+ *  Purpose:       create controller for  user note
  *
  *  @author  pandit walde
  *  @version 1.0
@@ -36,6 +43,11 @@ public class Notecontroller {
 	@Autowired
 	NoteserviceImp noteServiceImp;
 
+	/**
+	 * @param notedto   create note for user 
+	 * @param token     user token
+	 * @return          if  note is create return  add note successfully
+	 */
 	@PostMapping("/addNote")
 	public Response createNote(@RequestBody Notedto notedto,@RequestParam String token) {
 
@@ -47,6 +59,10 @@ public class Notecontroller {
 
 	}
 
+	/**
+	 * @param id     which note you want delete it
+	 * @return       if note delete retrun delete sucessfully.
+	 */
 	@DeleteMapping("/deleteNote")
 	public Response deleteNote(@RequestParam String id) {
 
@@ -55,18 +71,31 @@ public class Notecontroller {
 
 	}
 
+	/**
+	 * @param id  search the perticular note in db through by id
+	 * @return    if record is found retrun it.
+	 */
 	@GetMapping("/findNote")
 	public Response findNote(@RequestParam String id) {
 
 		return new Response(200, "note info", noteServiceImp.searchNote(id));
 	}
 
+	/**
+	 * @return   return all note for user
+	 */
+	
 	@GetMapping("/show")
 	public Response showAllNote() {
 		return new Response(200, "all note info", noteServiceImp.showAllNote());
 
 	}
 
+	/**
+	 * @param notedto  user provide  to updaed detail to controller
+	 * @param id        user want which note to update a details
+	 * @return          if note it update  retrun update sucessfully.
+	 */
 	@PutMapping("/updateNote")
 	public Response updateNote(@RequestBody Notedto notedto, @RequestParam String id) {
 		
@@ -75,17 +104,30 @@ public class Notecontroller {
 		  noteServiceImp.UpdateNote(notedto, id);
 		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
 	}
+	
+	/**
+	 * @return  return all sorted note by date
+	 */
 	@GetMapping("/sortnotebyname")
 	public Response sortNoteByName() {
 		
 		return new Response(200, "Sort note by name",noteServiceImp.sortNoteByName() );
 	}
+	/**
+	 * @return   return all sorted note by name
+	 */
 	@GetMapping("/sortnotebynote")
 	public Response sortNoteByDate() {
 		     System.out.println("in controller");
 		
 		return new Response(200, "Sort note by Date",noteServiceImp.sortNoteByDate() );
 	}
+	
+	
+	/**
+	 * @param   collabratorDto provide  details which want to collabrate
+	 * @return  if other user is collbrate retru  add collabrator succssfully
+	 */
 	@GetMapping("/addcollbrator")
 	public  Response addCollbrator( @RequestBody Collabratordto collabratorDto) {
 		

@@ -15,20 +15,20 @@ package com.bridgelabz.note.dto;
 
 import lombok.Data;
 
-@Data
+@Data   //genrate setter getter automically
 public class Notedto {
 	
 	
 
 	
 	
-	private String title;
-	private String  description;
-	private String color;
-	private boolean pin;
-	private boolean trash;
-	private boolean archive;
-	private boolean remider;
+	private String title;          //  getter setter of note title
+	private String  description;   // getter setter of note  description
+	private String color;          // getter setter of note color
+	private boolean pin;           // getter setter of pin 
+	private boolean trash;         // getter setter of trash 
+	private boolean archive;       // getter setter of archive 
+	private boolean remider;       // getter setter of remider 
 	
 
 }

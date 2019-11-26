@@ -3,11 +3,11 @@
  *  Execution:    
  *               
  *  
- *  Purpose:       create utility for jwt  response in  token
+ *  Purpose:       create  serviceimp class for note user
  *
  *  @author  pandit walde
  *  @version 1.0
- *  @since  19-11-2019
+ *  @since  25-11-2019
  *
  ******************************************************************************/
 package com.bridgelabz.note.services;
@@ -34,14 +34,20 @@ import com.bridgelabz.note.utility.Tokenutility;
 public class NoteserviceImp implements Noteservice {
 
 	@Autowired
-	Noterepository repo;
+	Noterepository repo;   //create Noterepository object
 
 	@Autowired
-	ModelMapper mapper;
+	ModelMapper mapper;    //create ModelMapper object
 
 	@Autowired
-	Tokenutility tokenutility;
+	Tokenutility tokenutility;  //create Tokenutility object
 
+	/**
+	 *    purpose  add new user note
+	 */
+	/**
+	 *
+	 */
 	@Override
 	public void createNote(Notedto notedto, String token) {
 
@@ -59,6 +65,9 @@ public class NoteserviceImp implements Noteservice {
 
 	}
 
+	/**
+	 *  purpose  delete  perticular note
+	 */
 	@Override
 	public String deleteNote(String id) {
 
@@ -73,6 +82,9 @@ public class NoteserviceImp implements Noteservice {
 
 	}
 
+	/**
+	 *   purpose  Search a perticular  user note 
+	 */
 	@Override
 	public Optional<Notemodel> searchNote(String id) {
 
@@ -80,12 +92,18 @@ public class NoteserviceImp implements Noteservice {
 
 	}
 
+	/**
+	 *   purpose  show all  user note
+	 */
 	@Override
 	public List<Notemodel> showAllNote() {
 
 		return repo.findAll();
 	}
 
+	/**
+	 * purpose  update  perticular Note
+	 */
 	@Override
 	public void UpdateNote(Notedto notedto, String id) {
 
@@ -107,6 +125,9 @@ public class NoteserviceImp implements Noteservice {
 
 	}
 
+	/**
+	 *    sort note by name
+	 */
 	@Override
 	public List<Notemodel> sortNoteByName() {
 
@@ -117,6 +138,9 @@ public class NoteserviceImp implements Noteservice {
 
 	}
 
+	/**
+	 *    sort note by date
+	 */
 	@Override
 	public List<Notemodel> sortNoteByDate() {
 
@@ -125,6 +149,10 @@ public class NoteserviceImp implements Noteservice {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 *  collabrator other user
+	
+	 */
 	@Override
 	public String addCollabrator(Collabratordto collabratorDto) {
 
