@@ -34,7 +34,7 @@ public class ElasticsearchserviceImp  implements Elasticsearchservice{
 		System.out.println(uuid);
 		Map<String, Object>map=mapper.convertValue(note, Map.class);
 		System.out.println("dd"+map);
-		IndexRequest indexrequest = new IndexRequest(INDEX, TYPE, note.getId().toString()).source(map);
+		IndexRequest indexrequest = new IndexRequest(INDEX, TYPE, note.getId());
 	
 		
 		IndexResponse indexresponse=client.index(indexrequest, RequestOptions.DEFAULT);

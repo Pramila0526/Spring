@@ -15,12 +15,13 @@ package com.bridgelabz.note.services;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.note.dto.Collabratordto;
@@ -28,28 +29,29 @@ import com.bridgelabz.note.dto.Notedto;
 import com.bridgelabz.note.exception.Deleteexception;
 import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.repo.Noterepository;
+import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.utility.Tokenutility;
 
 @Service
 public class NoteserviceImp implements Noteservice {
 
 	@Autowired
-	Noterepository repo;   //create Noterepository object
+	Noterepository repo; // create Noterepository object
 
 	@Autowired
-	ModelMapper mapper;    //create ModelMapper object
+	ModelMapper mapper; // create ModelMapper object
 
 	@Autowired
-	Tokenutility tokenutility;  //create Tokenutility object
+	Tokenutility tokenutility; // create Tokenutility object
 
 	/**
-	 *    purpose  add new user note
+	 * purpose add new user note
 	 */
 	/**
 	 *
 	 */
 	@Override
-	public void createNote(Notedto notedto, String token) {
+	public Response createNote(Notedto notedto, String token) {
 
 		Notemodel notemodel = mapper.map(notedto, Notemodel.class);
 
@@ -62,14 +64,14 @@ public class NoteserviceImp implements Noteservice {
 		notemodel.setUserid(user_id);
 
 		repo.save(notemodel);
-
+		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
 	}
 
 	/**
-	 *  purpose  delete  perticular note
+	 * purpose delete perticular note
 	 */
 	@Override
-	public String deleteNote(String id) {
+	public Response deleteNote(String id) {
 
 		Notemodel note_id = repo.findById(id).get();
 		if (note_id == null) {
@@ -78,22 +80,28 @@ public class NoteserviceImp implements Noteservice {
 		System.out.println(note_id);
 		repo.delete(note_id);
 
-		return MessageReference.NOTE_DELETE_SUCCESSFULLY;
+		return new Response(200, "note add", MessageReference.NOTE_DELETE_SUCCESSFULLY);
 
 	}
 
 	/**
-	 *   purpose  Search a perticular  user note 
+	 * purpose Search a perticular user note
 	 */
 	@Override
-	public Optional<Notemodel> searchNote(String id) {
+	public Response searchNote(String id) {
+       
+		if(id==null) {
+			return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
 
-		return repo.findById(id);
+		}
+		return new Response(200, "Note search",repo.findById(id));
+
+		
 
 	}
 
 	/**
-	 *   purpose  show all  user note
+	 * purpose show all user note
 	 */
 	@Override
 	public List<Notemodel> showAllNote() {
@@ -102,10 +110,10 @@ public class NoteserviceImp implements Noteservice {
 	}
 
 	/**
-	 * purpose  update  perticular Note
+	 * purpose update perticular Note
 	 */
 	@Override
-	public void UpdateNote(Notedto notedto, String id) {
+	public Response UpdateNote(Notedto notedto, String id) {
 
 		Notemodel updateNote = repo.findById(id).get();
 
@@ -123,100 +131,100 @@ public class NoteserviceImp implements Noteservice {
 
 		repo.save(updateNote);
 
+		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
+
 	}
 
 	/**
-	 *    sort note by name
+	 * sort note by name
 	 */
 	@Override
-	public List<Notemodel> sortNoteByName() {
+	public Response sortNoteByName() {
 
 		List<Notemodel> note = showAllNote();
 
-		return (List<Notemodel>) note.stream().sorted((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()))
+		  note.stream().sorted((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()))
 				.collect(Collectors.toList());
-
+       
+		return new Response(200, "Sort note by name",note);
 	}
 
 	/**
-	 *    sort note by date
+	 * sort note by date
 	 */
 	@Override
-	public List<Notemodel> sortNoteByDate() {
+//	public List<Notemodel> sortNoteByDate() {
+	public Response sortNoteByDate() {
 
 		List<Notemodel> note = showAllNote();
-		return note.stream().sorted((note1, note2) -> note1.getDate().compareTo(note2.getDate()))
-				.collect(Collectors.toList());
+		note.stream().sorted((note1, note2) -> note1.getDate().compareTo(note2.getDate())).collect(Collectors.toList());
+		return new Response(200, "sort by date", note);
 	}
 
 	/**
-	 *  collabrator other user
-	
+	 * collabrator other user
+	 * 
 	 */
 	@Override
-	public String addCollabrator(Collabratordto collabratorDto) {
+	public Response addCollabrator(Collabratordto collabratorDto) {
 
-		Notemodel ownerNote = repo.findById(collabratorDto.getOwnerId()).get();
+		Notemodel note = repo.findById(collabratorDto.getNoteId()).get();
+
 		List<String> list = new ArrayList<String>();
-		list = ownerNote.getCollabrators();
+		list = note.getCollabrators();
 		list.add(collabratorDto.getColaboratorId());
-		ownerNote.setCollabrators(list);
-		repo.save(ownerNote);
+		note.setCollabrators(list);
+		repo.save(note);
 
-		return "collabrator add successfully";
+		return new Response(200, "add collbrator", "collabrator add successfully");
 
 	}
-	
 
-	
 	@Override
 	public boolean archive(String token) {
 
-		String userid = tokenutility.getUserToken(token);
-		if (userid != null) {
-			Notemodel note = (Notemodel) repo.findByUserid(userid);
-			if (note != null) {
-				note.setArchive(!(note.isArchive()));
-				repo.save(note);
-				return true;
-
-			}
-		}
+//		String userid = tokenutility.getUserToken(token);
+//		if (userid != null) {
+//			Notemodel note = (Notemodel) repo.findByUserid(userid);
+//			if (note != null) {
+//				note.setArchive(!(note.isArchive()));
+//				repo.save(note);
+//				return true;
+//
+//			}
+//		}
 		return false;
 	}
-	
-	
 
 	@Override
 	public boolean pin(String token) {
-
-		String userid = tokenutility.getUserToken(token);
-		if (userid != null) {
-			Notemodel note = (Notemodel) repo.findByUserid(userid);
-			if (note != null) {
-				note.setPin(!(note.isPin()));
-				repo.save(note);
-				return true;
-
-			}
-		}
+//
+//		String userid = tokenutility.getUserToken(token);
+//		if (userid != null) {
+//			Notemodel note = (Notemodel) repo.findByUserid(userid);
+//			if (note != null) {
+//				note.setPin(!(note.isPin()));
+//				repo.save(note);
+//				return true;
+//
+//			}
+//		}
 		return false;
 	}
-	
 
 	@Override
 	public boolean trash(String token) {
-		String userid = tokenutility.getUserToken(token);
-		if (userid != null) {
-			Notemodel note = (Notemodel) repo.findByUserid(userid);
-			if (note != null) {
-				note.setTrash(!(note.isTrash()));
-				repo.save(note);
-				return true;
-
-			}
-
-		}
+//		String userid = tokenutility.getUserToken(token);
+//		if (userid != null) {
+//			Notemodel note = (Notemodel) repo.findByUserid(userid);
+//			if (note != null) {
+//				note.setTrash(!(note.isTrash()));
+//				repo.save(note);
+//				return true;
+//
+//			}
+//
+//		}
 		return false;
 	}
 }

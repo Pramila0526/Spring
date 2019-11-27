@@ -22,10 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bridgelabz.note.dto.Labeldto;
+import com.bridgelabz.note.exception.Deleteexception;
 import com.bridgelabz.note.model.Labelmodel;
 import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.repo.Labelrepository;
 import com.bridgelabz.note.repo.Noterepository;
+import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.utility.Tokenutility;
 
 /**
@@ -50,9 +52,10 @@ public class LabelserviceImp implements Labelservice {
 	
 	/**
 	 *    purpose  add new user label
+	 * @return 
 	 */
 	@Override
-	public void labelAdd(Labeldto labeldto,String token) {
+	public Response labelAdd(Labeldto labeldto,String token) {
 		
 		Labelmodel labelmodel=mapper.map(labeldto, Labelmodel.class);
 		
@@ -64,7 +67,7 @@ public class LabelserviceImp implements Labelservice {
 		labelmodel.setUserid(user_id);
 		labelRepo.save(labelmodel);
 		
-		
+		return new Response(200, "lable add",MessageReference.LABEL_ADD_SUCCESSFULLY );
 		
 	}
 
@@ -72,9 +75,13 @@ public class LabelserviceImp implements Labelservice {
 	 *  purpose  delete  perticular label
 	 */
 	@Override
-	public void labelDelete(String id) {
-		
+	public Response labelDelete(String id) {
+		 
+		Labelmodel label=labelRepo.findById(id).get();
+		 if(label==null) { throw new Deleteexception(MessageReference.LABEL_NOT_FOUND);}
+		 
 		 labelRepo.deleteById(id);
+		 return new Response(200, "label delete", MessageReference.LABEL_DELETE_SUCCESSFULLY);
 		
 	}
 
@@ -82,7 +89,7 @@ public class LabelserviceImp implements Labelservice {
 	 *  purpose  update  perticular label
 	 */
 	@Override
-	public void labelUpdate(Labeldto labeldto, String id) {
+	public Response labelUpdate(Labeldto labeldto, String id) {
 		Labelmodel labelmodel=labelRepo.findById(id).get();
 		
 		labelmodel.setLable_title(labeldto.getLable_title());
@@ -91,7 +98,8 @@ public class LabelserviceImp implements Labelservice {
 		
 		labelRepo.save(labelmodel);
 		
-		
+		 return new Response(200, "label update", MessageReference.LABEL_UPDATE_SUCCESSFULLY);
+			
 	}
 
 	/**
@@ -102,6 +110,7 @@ public class LabelserviceImp implements Labelservice {
 		
 		return (ArrayList<Labelmodel>) labelRepo.findAll();
 		
+		
 	}
 	
 	
@@ -110,22 +119,24 @@ public class LabelserviceImp implements Labelservice {
 	 * purpose  Search a perticular  user label 
 	 */
 	@Override
-	public Optional<Labelmodel> labelSearch(String id) {
+	public Response labelSearch(String id) {
 		
-		return  labelRepo.findById(id);
 		
+		 return new Response(200, "  user label ",labelRepo.findById(id));
 	}
 
 	/**
 	 *  purpose  find  by user id for label
 	 */
 	@Override
-	public ArrayList<Labelmodel> findLabelByUser_id(String user_id) {
+	public Response findLabelByUser_id(String user_id) {
 		
 	
-		return (ArrayList<Labelmodel>) labelRepo.findByUserid(user_id);
+	
+		 return new Response(200, "  user label ",labelRepo.findByUserid(user_id));
 	}
 
+	
 	
 	
 	
@@ -133,32 +144,37 @@ public class LabelserviceImp implements Labelservice {
 	 *  purpose   main goal is relationship between label and note
 	 */
 	@Override
-	public String assignNote(String noteid, String labelid) {
+	public Response manyToMany(String noteid, String labelid) {
+		
+		List<Notemodel> notelist=new ArrayList<Notemodel>();
+		List<Labelmodel> labellist=new ArrayList<Labelmodel>();
 		
 		Labelmodel label=labelRepo.findById(labelid).get(); //check label id present or not
 		if(label==null)
 		{
-		 return "label id not found";
+			return new Response(200, "assign note"," label id not found");
+			 
+		 
 		}
 		Notemodel note=noteRepo.findById(noteid).get();   //check note id present or not
 		if(note==null)
 		{
-		 return "note id not found";
-		}
-		List<Notemodel> notelist=new ArrayList<Notemodel>();
-		List<Labelmodel> labellist=new ArrayList<Labelmodel>();
-	
+			return new Response(200, "assign note"," note id not found");
+			 
 		 
+		}
+				 
 		labellist.add(label);
 		notelist.add(note);
 		
-		label.setListOfNote(label.getListOfNote());
-		note.setListOfLabels(note.getListOfLabels());
+		label.setListOfNote(notelist);
+		note.setListOfLabels(labellist);
 	  	
 		 labelRepo.save(label);
 	  	 noteRepo.save(note);
 	  	 
-	  	 return "sucess";
+	
+	  	return new Response(200, "assign note"," mapping sucess");
 		 
 	}
 

@@ -20,6 +20,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -48,9 +49,11 @@ public class Notemodel {
 	private LocalDateTime date;
 	
 	private String userid;
-	private List<String > collabrators=new  ArrayList<String>(); //list use for collaborators other person
+	private List<String > collabrators; //list use for collaborators other person
+	@JsonIgnore
+	
 	@DBRef
-	List<Labelmodel> listOfLabels=new ArrayList<Labelmodel>(); //this list use for relationship between note and label
+	List<Labelmodel> listOfLabels; //this list use for relationship between note and label
 	
 
 

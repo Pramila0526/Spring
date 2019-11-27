@@ -19,7 +19,11 @@
  ******************************************************************************/
 package com.bridgelabz.note.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
-
 import com.bridgelabz.note.response.Response;
-import com.bridgelabz.note.services.MessageReference;
 import com.bridgelabz.note.services.NoteserviceImp;
 
 @RestController
@@ -49,89 +51,99 @@ public class Notecontroller {
 	 * @return          if  note is create return  add note successfully
 	 */
 	@PostMapping("/addNote")
-	public Response createNote(@RequestBody Notedto notedto,@RequestParam String token) {
+	public ResponseEntity<Response> createNote(@Valid @RequestBody Notedto notedto,@RequestParam String token) {
 
 		
 		System.out.println("token:"+token);
 		noteServiceImp.createNote(notedto,token);
-
-		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
+		return new ResponseEntity<Response>(noteServiceImp.createNote(notedto,token), HttpStatus.OK);
+		
+	
 
 	}
 
 	/**
 	 * @param id     which note you want delete it
-	 * @return       if note delete retrun delete sucessfully.
+	 * @return       if note delete return delete successfully.
 	 */
 	@DeleteMapping("/deleteNote")
-	public Response deleteNote(@RequestParam String id) {
+	public  ResponseEntity<Response> deleteNote(@RequestParam String id) {
 
-		noteServiceImp.deleteNote(id);
-		return new Response(200, "note add", MessageReference.NOTE_DELETE_SUCCESSFULLY);
+		
+		return new ResponseEntity<Response>(noteServiceImp.deleteNote(id), HttpStatus.OK);
+		
+	
 
 	}
 
 	/**
-	 * @param id  search the perticular note in db through by id
-	 * @return    if record is found retrun it.
+	 * @param id  search the particular note in db through by id
+	 * @return    if record is found return it.
 	 */
 	@GetMapping("/findNote")
-	public Response findNote(@RequestParam String id) {
+	public  ResponseEntity<Response>findNote( @Valid @RequestParam String id) {
 
-		return new Response(200, "note info", noteServiceImp.searchNote(id));
+		return new ResponseEntity<Response>(noteServiceImp.searchNote(id), HttpStatus.OK);
+	
 	}
 
 	/**
 	 * @return   return all note for user
 	 */
 	
-	@GetMapping("/show")
+	@GetMapping("/shownote")
 	public Response showAllNote() {
-		return new Response(200, "all note info", noteServiceImp.showAllNote());
+		
+		
+		return new Response(200,"show all note",noteServiceImp.showAllNote());
+		
 
 	}
 
 	/**
-	 * @param notedto  user provide  to updaed detail to controller
+	 * @param notedto  user provide  to updated detail to controller
 	 * @param id        user want which note to update a details
-	 * @return          if note it update  retrun update sucessfully.
+	 * @return          if note it update  return update successfully.
 	 */
 	@PutMapping("/updateNote")
-	public Response updateNote(@RequestBody Notedto notedto, @RequestParam String id) {
+	public  ResponseEntity<Response> updateNote(@Valid @RequestBody Notedto notedto, @RequestParam String id) {
 		
 	
-          
-		  noteServiceImp.UpdateNote(notedto, id);
-		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
+      
+		  return new ResponseEntity<Response>(noteServiceImp.UpdateNote(notedto, id), HttpStatus.OK);
+	
 	}
 	
 	/**
 	 * @return  return all sorted note by date
 	 */
 	@GetMapping("/sortnotebyname")
-	public Response sortNoteByName() {
+	public  ResponseEntity<Response> sortNoteByName() {
 		
-		return new Response(200, "Sort note by name",noteServiceImp.sortNoteByName() );
+		return new ResponseEntity<Response>(noteServiceImp.sortNoteByName(), HttpStatus.OK);
+		
 	}
+
 	/**
-	 * @return   return all sorted note by name
+	 * @return return all sorted note by name
 	 */
-	@GetMapping("/sortnotebynote")
-	public Response sortNoteByDate() {
-		     System.out.println("in controller");
-		
-		return new Response(200, "Sort note by Date",noteServiceImp.sortNoteByDate() );
-	}
-	
+	@GetMapping("/sortnotebydate")
+	public ResponseEntity<Response> sortNoteByDate() {
+
+		return new ResponseEntity<Response>(noteServiceImp.sortNoteByDate(), HttpStatus.OK);
+
+	}	
 	
 	/**
-	 * @param   collabratorDto provide  details which want to collabrate
-	 * @return  if other user is collbrate retru  add collabrator succssfully
+	 * @param   collabratorDto provide  details which want to collaborate
+	 * @return  if other user is collaborate return  add collabrator successfully
 	 */
-	@GetMapping("/addcollbrator")
-	public  Response addCollbrator( @RequestBody Collabratordto collabratorDto) {
+	@PutMapping("/addcollbrator")
+	public   ResponseEntity<Response> addCollbrator(@Valid @RequestBody Collabratordto collabratorDto) {
 		
-		return new Response(200, "add collbrator", noteServiceImp.addCollabrator(collabratorDto) );
+		
+		return new ResponseEntity<Response>(noteServiceImp.addCollabrator(collabratorDto), HttpStatus.OK);
+		
 	}
 	
 	 

@@ -88,8 +88,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 
 		String token = tokenutility.createToken(user.getId());
-		Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
-		template.convertAndSend("userMessageQueue", body);
+	Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
+	template.convertAndSend("userMessageQueue", body);
 		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
 		//javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token, MessageReference.REGISTRATION_MAIL_TEXT)); // send
 	

@@ -33,7 +33,7 @@ public class MessageReference {
     public static final String NOTE_DELETE_SUCCESSFULLY="Note delete Succssfully";
     public static final String NOTE_UPDATE_SUCCESSFULLY="Note update Succssfully";
     
-    
+    public static final String LABEL_NOT_FOUND=" label id not found   ";
     public static final String LABEL_ADD_SUCCESSFULLY="New lable add Successfully ";
     public static final String LABEL_DELETE_SUCCESSFULLY="= lable delete Succssfully";
     public static final String LABEL_UPDATE_SUCCESSFULLY=" lable update Succssfully";

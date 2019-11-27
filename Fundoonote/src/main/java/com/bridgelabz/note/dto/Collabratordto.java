@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class Collabratordto {
 	
-	private String ownerId;    //user note id
+	private String noteId;    //user note id
 	
 	private String colaboratorId; //other user id
 	
