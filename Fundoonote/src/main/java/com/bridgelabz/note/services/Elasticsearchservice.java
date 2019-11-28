@@ -10,7 +10,7 @@ public interface Elasticsearchservice {
 	
 	
 	public Response createDocuemnt(Notemodel note) throws IOException;
-	public String readDocuement(String id);
+	public Response readDocuement(String id)throws IOException;
 	public String search(String searchstring);
 
 }

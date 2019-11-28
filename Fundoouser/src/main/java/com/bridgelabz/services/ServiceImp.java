@@ -18,6 +18,8 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -40,7 +42,8 @@ import com.bridgelabz.utility.Utility;
 
 @Service
 public class ServiceImp implements com.bridgelabz.services.Service {
-
+   
+	static  Logger logger=LoggerFactory.getLogger(ServiceImp.class);
 	@Autowired
 	private Userrepo repo; // create object user repo
 
@@ -61,6 +64,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Autowired
 	RabbitTemplate template;
+	
 
 	/**
 	 * purpose: add new user detail in database if user add already recored then
@@ -69,6 +73,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	@Override
 	public String addNewUser(@Valid Registerdto regdto) {
 
+		
 		User user = mapper.map(regdto, User.class); // store new user data in mapper
 
 		if (repo.findAll().stream().anyMatch(i -> i.getEmail().equals(regdto.getEmail()))) // check user already
@@ -92,7 +97,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	template.convertAndSend("userMessageQueue", body);
 		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
 		//javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token, MessageReference.REGISTRATION_MAIL_TEXT)); // send
-	
+	      logger.isWarnEnabled();
 		return MessageReference.USER_ADD_SUCCESSFULLY;
 	}
 

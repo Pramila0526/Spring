@@ -16,17 +16,20 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
-import com.bridgelabz.note.exception.Deleteexception;
+
+import com.bridgelabz.note.exception.custom.Notenotfoundexception;
+import com.bridgelabz.note.exception.custom.Usernotfoundexception;
 import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.repo.Noterepository;
 import com.bridgelabz.note.response.Response;
@@ -34,7 +37,7 @@ import com.bridgelabz.note.utility.Tokenutility;
 
 @Service
 public class NoteserviceImp implements Noteservice {
-
+	static  Logger logger=LoggerFactory.getLogger(LabelserviceImp.class);
 	@Autowired
 	Noterepository repo; // create Noterepository object
 
@@ -60,7 +63,9 @@ public class NoteserviceImp implements Noteservice {
 		notemodel.setColor(notedto.getColor());
 		LocalDateTime datetime = LocalDateTime.now();
 		notemodel.setDate(datetime);
+		System.out.println("fff");
 		String user_id = tokenutility.getUserToken(token);
+		System.out.println("dggg");
 		notemodel.setUserid(user_id);
 
 		repo.save(notemodel);
@@ -75,7 +80,7 @@ public class NoteserviceImp implements Noteservice {
 
 		Notemodel note_id = repo.findById(id).get();
 		if (note_id == null) {
-			throw new Deleteexception(MessageReference.NOTE_ID_NOT_FOUND);
+			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
 		System.out.println(note_id);
 		repo.delete(note_id);
@@ -89,14 +94,13 @@ public class NoteserviceImp implements Noteservice {
 	 */
 	@Override
 	public Response searchNote(String id) {
-       
-		if(id==null) {
-			return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
 
+		Notemodel note_id = repo.findById(id).get();
+		if (note_id == null) {
+			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
-		return new Response(200, "Note search",repo.findById(id));
 
-		
+		return new Response(200, "Note search", repo.findById(id));
 
 	}
 
@@ -118,7 +122,7 @@ public class NoteserviceImp implements Noteservice {
 		Notemodel updateNote = repo.findById(id).get();
 
 		if (updateNote == null) {
-			throw new Deleteexception(MessageReference.NOTE_ID_NOT_FOUND);
+			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
 		System.out.println(notedto.getColor());
 		System.out.println(notedto.getDescription());
@@ -142,11 +146,14 @@ public class NoteserviceImp implements Noteservice {
 	public Response sortNoteByName() {
 
 		List<Notemodel> note = showAllNote();
+		if (note.isEmpty()) {
+			return new Response(200, "sort by name", MessageReference.NOTE_IS_EMPTY);
+		}
 
-		  note.stream().sorted((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()))
+		note.stream().sorted((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()))
 				.collect(Collectors.toList());
-       
-		return new Response(200, "Sort note by name",note);
+
+		return new Response(200, "Sort note by name", note);
 	}
 
 	/**
@@ -157,6 +164,9 @@ public class NoteserviceImp implements Noteservice {
 	public Response sortNoteByDate() {
 
 		List<Notemodel> note = showAllNote();
+		if (note.isEmpty()) {
+			return new Response(200, "sort by date", MessageReference.NOTE_IS_EMPTY);
+		}
 		note.stream().sorted((note1, note2) -> note1.getDate().compareTo(note2.getDate())).collect(Collectors.toList());
 		return new Response(200, "sort by date", note);
 	}
@@ -169,6 +179,10 @@ public class NoteserviceImp implements Noteservice {
 	public Response addCollabrator(Collabratordto collabratorDto) {
 
 		Notemodel note = repo.findById(collabratorDto.getNoteId()).get();
+
+		if (note == null) {
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
+		}
 
 		List<String> list = new ArrayList<String>();
 		list = note.getCollabrators();

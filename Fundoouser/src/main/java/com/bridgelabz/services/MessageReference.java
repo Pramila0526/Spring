@@ -35,6 +35,7 @@ public class MessageReference {
     public static final String PASSWORD_NOT_CHANGE_SUCCESSFULLY="password not Change  successfully";
     public static final String MAIL_SEND=" Mail send ";
     public static final String PASSWORD_IS_NOT_MATCHING =" Both password are not matching";
+    public static final String 	INVALID_TOKEN=" invalid token ";
    
 
 }

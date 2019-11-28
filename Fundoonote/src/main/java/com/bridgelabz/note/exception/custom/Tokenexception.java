@@ -10,16 +10,16 @@
  *  @since  19-11-2019
  *
  ******************************************************************************/
-package com.bridgelabz.note.exception;
+package com.bridgelabz.note.exception.custom;
 
-public class Deleteexception  extends RuntimeException{
+public class Tokenexception  extends RuntimeException{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public Deleteexception(String message)
+	public Tokenexception(String message)
 	{
 		
 		super(message);

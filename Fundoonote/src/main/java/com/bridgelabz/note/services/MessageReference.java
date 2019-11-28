@@ -33,6 +33,7 @@ public class MessageReference {
     public static final String NOTE_DELETE_SUCCESSFULLY="Note delete Succssfully";
     public static final String NOTE_UPDATE_SUCCESSFULLY="Note update Succssfully";
     
+    public static final String NOTE_NOT_FOUND=" note id not found   ";
     public static final String LABEL_NOT_FOUND=" label id not found   ";
     public static final String LABEL_ADD_SUCCESSFULLY="New lable add Successfully ";
     public static final String LABEL_DELETE_SUCCESSFULLY="= lable delete Succssfully";
@@ -43,13 +44,14 @@ public class MessageReference {
     
     
     
-    
+    public static final String NOTE_IS_EMPTY="NOTE  is empty";
     public static final String NOTE_ID_NOT_FOUND="NOTE could not be found with id ";
     public static final String USER_NOT_EXISTING=" user not existing ";
     public static final String PASSWORD_CHANGE_SUCCESSFULLY="password Change  successfully";
     public static final String PASSWORD_NOT_CHANGE_SUCCESSFULLY="password not Change  successfully";
     public static final String MAIL_SEND=" Mail send ";
     public static final String PASSWORD_IS_NOT_MATCHING =" Both password are not matching";
+    public static final String 	INVALID_TOKEN=" invalid token ";
    
 
 }

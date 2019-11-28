@@ -18,6 +18,9 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
+import com.bridgelabz.note.exception.custom.Tokenexception;
+import com.bridgelabz.note.services.MessageReference;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -43,12 +46,16 @@ public class Tokenutility {
 	 * @return       return token subject
 	 */
 	public String getUserToken(String token)
-	{
+	{         
+		  Claims claim = null;
+		try {
 		    System.out.println("token :-"+token);
-		    Claims claim = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-	      
+		    claim = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+	          
 		     System.out.println(claim.getSubject());
-		    return claim.getSubject();
+		    
+		    }catch(Exception e) { throw new Tokenexception(MessageReference.INVALID_TOKEN); }
+		return  claim.getSubject();
 		
 	}
 
