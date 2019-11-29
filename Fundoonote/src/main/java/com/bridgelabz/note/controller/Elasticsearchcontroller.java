@@ -5,8 +5,10 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,10 +31,30 @@ public class Elasticsearchcontroller {
 	}
 	
 	
+	
 	@GetMapping("/read")
-	public ResponseEntity<Response> read(String id) throws IOException{
+	public ResponseEntity<Response> read( @RequestParam String id) throws IOException{
 		return new ResponseEntity<Response>((elasticsearchserviceImp.readDocuement(id)),HttpStatus.OK);
 		
+	}
+	
+	@DeleteMapping("/delete")
+	public ResponseEntity<Response> deleteDocuemnt( @RequestParam String id) throws IOException{
+		return new ResponseEntity<Response>((elasticsearchserviceImp.deleteDocuemnt(id)),HttpStatus.OK);
+		
+	}
+	
+	@GetMapping("/showall")
+	public Response showAll() throws IOException {
+           System.out.println("in controller");
+		return new Response(200, " all notes ", elasticsearchserviceImp.findAll());
+	}
+	
+	@PutMapping("/update")
+	public ResponseEntity<Response> updateInfo(@RequestBody Notemodel note,@RequestParam String id) throws IOException {
+        
+		return new ResponseEntity<Response>((elasticsearchserviceImp.updateDocuemnt(note, id)),HttpStatus.CREATED);
+	
 	}
 
 }

@@ -27,7 +27,7 @@ import com.bridgelabz.note.exception.custom.Labelnotfoundexception;
 import com.bridgelabz.note.exception.custom.Notenotfoundexception;
 import com.bridgelabz.note.model.Labelmodel;
 import com.bridgelabz.note.model.Notemodel;
-import com.bridgelabz.note.repo.Esrepository;
+import com.bridgelabz.note.repo.Redisrepository;
 import com.bridgelabz.note.repo.Labelrepository;
 import com.bridgelabz.note.repo.Noterepository;
 import com.bridgelabz.note.response.Response;
