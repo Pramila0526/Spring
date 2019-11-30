@@ -25,6 +25,7 @@ public interface Noterepository extends MongoRepository<Notemodel, Object> {  //
 	
 	
 	public List<Notemodel> findByUserid(String userid);
+	public List<Notemodel> findByTitle(String title);
 	
 
 }

@@ -19,6 +19,8 @@
  ******************************************************************************/
 package com.bridgelabz.note.controller;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,22 +38,27 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
 import com.bridgelabz.note.response.Response;
+import com.bridgelabz.note.services.ElasticsearchserviceImp;
 import com.bridgelabz.note.services.NoteserviceImp;
 
 @RestController
-@RequestMapping("/")
+//@RequestMapping("/")
 public class Notecontroller {
 
 	@Autowired
 	NoteserviceImp noteServiceImp;
 
+	@Autowired
+	ElasticsearchserviceImp elasticsearchserviceImp;
+
 	/**
 	 * @param notedto create note for user
 	 * @param token   user token
 	 * @return if note is create return add note successfully
+	 * @throws IOException 
 	 */
 	@PostMapping("/addNote")
-	public ResponseEntity<Response> createNote(@Valid @RequestBody Notedto notedto, @RequestParam String token) {
+	public ResponseEntity<Response> createNote(@Valid @RequestBody Notedto notedto, @RequestParam String token) throws IOException {
 
 		System.out.println("token:" + token);
 		noteServiceImp.createNote(notedto, token);
@@ -132,6 +139,21 @@ public class Notecontroller {
 	public ResponseEntity<Response> addCollbrator(@Valid @RequestBody Collabratordto collabratorDto) {
 
 		return new ResponseEntity<Response>(noteServiceImp.addCollabrator(collabratorDto), HttpStatus.OK);
+
+	}
+	
+	@GetMapping("/searchbytitle")
+	public ResponseEntity<Response> searchdByTitle( @RequestParam String title) throws Exception {
+            
+	
+		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByTitle(title), HttpStatus.OK);
+
+	}
+	@GetMapping("/searchbyDescription")
+	public ResponseEntity<Response> searchdByDescription(@Valid @RequestParam String description) throws Exception {
+
+		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByDescription(description), HttpStatus.OK);
+		
 
 	}
 

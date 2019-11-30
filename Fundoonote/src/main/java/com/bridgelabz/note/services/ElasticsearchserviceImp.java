@@ -45,7 +45,8 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 	@Autowired
 	private ObjectMapper mapper;
 
-	
+	@Autowired
+	ElasticsearchserviceImp elasticsearchserviceImp;
 	@Override
 	public Response createDocuemnt(Notemodel note) throws IOException {
 		
@@ -76,6 +77,22 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 	}
 	
 	
+	@Override
+	
+        public Response searchByTitle(String title) throws IOException {
+		
+	
+		SearchRequest searchRequest=new SearchRequest();
+		SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
+		searchSourceBuilder.query(QueryBuilders.boolQuery().should(QueryBuilders.queryStringQuery(title).lenient(true).field("title")));
+		searchRequest.source(searchSourceBuilder);
+		SearchResponse searchResponse=client.search(searchRequest, RequestOptions.DEFAULT);
+	    	
+	 
+		
+	  return new Response(200, "user title", getSearchResult(searchResponse));
+		
+	}
 	
 
 	@Override
@@ -130,6 +147,7 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 	
 	
 	
+	
 
 	@Override
 	public List<Notemodel> findAll() throws IOException {
@@ -157,6 +175,22 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 			Arrays.stream(searchHit).forEach(i ->list.add(mapper.convertValue(i.getSourceAsMap(), Notemodel.class)));
 		}
 		return list;
+	}
+
+
+
+
+	@Override
+	public Response searchByDescription(String description) throws IOException {
+		SearchRequest searchRequest=new SearchRequest();
+		SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
+		searchSourceBuilder.query(QueryBuilders.boolQuery().should(QueryBuilders.queryStringQuery(description).lenient(true).field("description")));
+		searchRequest.source(searchSourceBuilder);
+		SearchResponse searchResponse=client.search(searchRequest, RequestOptions.DEFAULT);
+	
+		
+	  return new Response(200, "user title", getSearchResult(searchResponse));
+		
 	}
 	
 

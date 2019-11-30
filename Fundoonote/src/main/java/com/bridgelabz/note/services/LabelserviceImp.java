@@ -21,30 +21,36 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import com.bridgelabz.note.dto.Labeldto;
 import com.bridgelabz.note.exception.custom.Labelnotfoundexception;
 import com.bridgelabz.note.exception.custom.Notenotfoundexception;
 import com.bridgelabz.note.model.Labelmodel;
 import com.bridgelabz.note.model.Notemodel;
-import com.bridgelabz.note.repo.Redisrepository;
+
 import com.bridgelabz.note.repo.Labelrepository;
 import com.bridgelabz.note.repo.Noterepository;
 import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.utility.Tokenutility;
-
 
 /**
  * @author user
  *
  */
 @Component
+
+
+
 public class LabelserviceImp implements Labelservice {
-	static  Logger logger=LoggerFactory.getLogger(LabelserviceImp.class);
+	static Logger logger = LoggerFactory.getLogger(LabelserviceImp.class);
 
 	@Autowired
 	private ModelMapper mapper; // create modelmapper object
-
 	@Autowired
 	private Labelrepository labelRepo; // create lable repository object
 
@@ -53,40 +59,46 @@ public class LabelserviceImp implements Labelservice {
 
 	@Autowired
 	private Tokenutility tokenUtility; // create Tokenutility object
-	
-
-
 
 	/**
 	 * purpose add new user label
 	 * 
 	 * @return
 	 */
+	
+	
+
+	@Cacheable(value = "labeldto", key = "#token")
 	@Override
 	public Response labelAdd(Labeldto labeldto, String token) {
-
+        System.out.println("1");
 		Labelmodel labelmodel = mapper.map(labeldto, Labelmodel.class);
 		labelmodel.setLable_title(labeldto.getLable_title());
 		LocalDateTime datetime = LocalDateTime.now();
 		labelmodel.setCreated_date(datetime);
-
+		System.out.println("2");
 		String user_id = tokenUtility.getUserToken(token);
 		labelmodel.setUserid(user_id);
 		labelRepo.save(labelmodel);
-		
-		
+		System.out.println("1");
 		return new Response(200, "lable add", MessageReference.LABEL_ADD_SUCCESSFULLY);
 
 	}
+	
+	
+	
+	
 
 	/**
 	 * purpose delete perticular label
 	 */
+
+	
 	@Override
 	public Response labelDelete(String id) {
 
-	   Optional<Labelmodel>	 label = labelRepo.findById(id);
-	   System.out.println(label);
+		Optional<Labelmodel> label = labelRepo.findById(id);
+		System.out.println(label);
 		if (label.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 		}
@@ -131,7 +143,7 @@ public class LabelserviceImp implements Labelservice {
 	 */
 	@Override
 	public Response labelSearch(String id) {
-         System.out.println("dddd");
+		System.out.println("dddd");
 		Optional<Labelmodel> labelmodel = labelRepo.findById(id);
 		if (labelmodel.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);

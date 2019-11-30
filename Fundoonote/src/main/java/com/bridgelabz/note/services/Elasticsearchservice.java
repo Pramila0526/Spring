@@ -16,6 +16,8 @@ public interface Elasticsearchservice {
 	public Response  deleteDocuemnt(String id)throws IOException;
 	public Response  updateDocuemnt(Notemodel note ,String id)throws IOException;
 	public List<Notemodel> findAll()throws IOException;
+	public Response searchByTitle(String title) throws IOException;
+	public Response searchByDescription(String description) throws IOException;
 	
 
 }

@@ -22,6 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -66,10 +69,17 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	RabbitTemplate template;
 	
 
+	@Autowired
+	private RedisTemplate<String,Object> redisTemp;
+	
 	/**
 	 * purpose: add new user detail in database if user add already recored then
 	 * show user email already existing & password store encrypt format
 	 */
+	
+	@Cacheable("/persons")
+//	@Value("${key}")
+//	private String key;
 	@Override
 	public String addNewUser(@Valid Registerdto regdto) {
 
@@ -93,11 +103,16 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 
 		String token = tokenutility.createToken(user.getId());
-	Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
-	template.convertAndSend("userMessageQueue", body);
+//	Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
+//	template.convertAndSend("userMessageQueue", body);
 		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
 		//javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token, MessageReference.REGISTRATION_MAIL_TEXT)); // send
 	      logger.isWarnEnabled();
+	      
+	      String gettoken=tokenutility.getUserToken(token);
+	   // redisTemp.opsForValue().set(key, gettoken);
+		  
+	  	
 		return MessageReference.USER_ADD_SUCCESSFULLY;
 	}
 
@@ -125,6 +140,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	/**
 	 * Purpose : login user though email id or password
 	 */
+	
+	
 	@Override
 	public String loginUser(@Valid Logindto loginDTO) {
 

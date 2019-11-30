@@ -24,10 +24,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Document(collection =   "label")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 
 public class Labelmodel {
 	

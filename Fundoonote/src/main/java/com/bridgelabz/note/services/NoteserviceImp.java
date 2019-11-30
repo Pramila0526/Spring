@@ -12,6 +12,7 @@
  ******************************************************************************/
 package com.bridgelabz.note.services;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,15 +47,20 @@ public class NoteserviceImp implements Noteservice {
 
 	@Autowired
 	Tokenutility tokenutility; // create Tokenutility object
+	
+	
+	@Autowired
+	ElasticsearchserviceImp elasticsearchserviceImp;
 
 	/**
 	 * purpose add new user note
 	 */
 	/**
+	 * @throws IOException 
 	 *
 	 */
 	@Override
-	public Response createNote(Notedto notedto, String token) {
+	public Response createNote(Notedto notedto, String token) throws IOException {
 
 		Notemodel notemodel = mapper.map(notedto, Notemodel.class);
 
@@ -63,12 +69,14 @@ public class NoteserviceImp implements Noteservice {
 		notemodel.setColor(notedto.getColor());
 		LocalDateTime datetime = LocalDateTime.now();
 		notemodel.setDate(datetime);
-		System.out.println("fff");
+		
 		String user_id = tokenutility.getUserToken(token);
-		System.out.println("dggg");
+		
 		notemodel.setUserid(user_id);
-
+         
 		repo.save(notemodel);
+	
+		elasticsearchserviceImp.createDocuemnt(notemodel);
 		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
 	}
 
@@ -240,5 +248,14 @@ public class NoteserviceImp implements Noteservice {
 //
 //		}
 		return false;
+	}
+
+	
+	
+	@Override
+	public Response searchByTitle(String title) throws Exception {	
+		
+		
+		 return new Response(200,  "user title", elasticsearchserviceImp.searchByTitle(title));
 	}
 }
