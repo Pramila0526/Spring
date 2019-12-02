@@ -45,6 +45,7 @@ public class MessageReference {
     
     
     public static final String NOTE_IS_EMPTY="NOTE  is empty";
+    public static final String USER_ID_NOT_FOUND="user could not be found with id ";
     public static final String NOTE_ID_NOT_FOUND="NOTE could not be found with id ";
     public static final String USER_NOT_EXISTING=" user not existing ";
     public static final String PASSWORD_CHANGE_SUCCESSFULLY="password Change  successfully";

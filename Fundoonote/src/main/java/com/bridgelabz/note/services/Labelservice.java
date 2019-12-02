@@ -13,7 +13,6 @@
 package com.bridgelabz.note.services;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import com.bridgelabz.note.dto.Labeldto;
 import com.bridgelabz.note.model.Labelmodel;

@@ -26,7 +26,7 @@ public interface Noteservice {
 	
 	
 	public Response createNote(Notedto notedto,String token) throws IOException; //create createNote() method for add new note
-	public Response deleteNote(String id);                  //create deleteNote() method for delete note
+	public Response deletePermanentNote(String id);                  //create deleteNote() method for delete note
 	public Response UpdateNote(Notedto notedto,String id);    //create UpdateNote() method for update note 
 	public Response searchNote(String id);     //create UpdateNote() method for search perticular note
     public List<Notemodel>  showAllNote();                 //create showAllNote() method for show all note
@@ -37,7 +37,7 @@ public interface Noteservice {
 	public boolean archive(String token);    //create archive() method for user archive note
 	public boolean pin(String token);        //create UpdateNote() method for user archive pin 
 	public boolean trash(String token);       //create UpdateNote() method for  user archive trash
-    public Response searchByTitle(String title) throws IOException, Exception;
+   
 	//	 
 
 }

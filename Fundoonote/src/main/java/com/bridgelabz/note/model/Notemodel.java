@@ -13,7 +13,6 @@
 package com.bridgelabz.note.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;

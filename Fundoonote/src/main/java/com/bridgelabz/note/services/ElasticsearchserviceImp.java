@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -19,14 +17,11 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.utility.Responseutility;
@@ -36,9 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ElasticsearchserviceImp implements Elasticsearchservice {
 
-	private final String INDEX = "note";
+	private final String INDEX = "note";   
 	private final String TYPE = "notes";
 
+	
 	@Autowired
 	private RestHighLevelClient client;
 
@@ -65,6 +61,7 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 	
 	
 
+	
 	@Override
 	public Response readDocuement(String id) throws IOException {
 		
@@ -81,15 +78,26 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 	
         public Response searchByTitle(String title) throws IOException {
 		
-	
+	    
 		SearchRequest searchRequest=new SearchRequest();
-		SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
-		searchSourceBuilder.query(QueryBuilders.boolQuery().should(QueryBuilders.queryStringQuery(title).lenient(true).field("title")));
-		searchRequest.source(searchSourceBuilder);
-		SearchResponse searchResponse=client.search(searchRequest, RequestOptions.DEFAULT);
+
+	
+		
+	     SearchSourceBuilder searchSourceBuilder=new SearchSourceBuilder();
+
+	    
+	     searchSourceBuilder.query(QueryBuilders
+	    		 .boolQuery().should(QueryBuilders.queryStringQuery(title)
+	    				 .lenient(true)
+	    				 .field("title")));
+
+	     searchRequest.source(searchSourceBuilder);
+
+	     SearchResponse searchResponse=client.search(searchRequest, RequestOptions.DEFAULT);
 	    	
 	 
-		
+
+	   
 	  return new Response(200, "user title", getSearchResult(searchResponse));
 		
 	}
@@ -179,6 +187,8 @@ public class ElasticsearchserviceImp implements Elasticsearchservice {
 
 
 
+	
+	
 
 	@Override
 	public Response searchByDescription(String description) throws IOException {

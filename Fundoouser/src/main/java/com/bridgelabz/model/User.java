@@ -27,14 +27,13 @@ import lombok.Data;
 public class User {
 
 	@Id
-	private String id;
-	
+	private String id;	
 	private String firstname;
 	private String lastname;
 	private String email;	
 	private String password;
-	private long phonenumber;
-	
+	private long phonenumber;	
 	private boolean validate;
+	private String profile;
 	
 }

@@ -12,9 +12,13 @@
  ******************************************************************************/
 package com.bridgelabz.services;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Path;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
@@ -23,11 +27,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoProperties.Storage;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.bridgelabz.config.Passwordconfig;
 import com.bridgelabz.dto.Logindto;
 import com.bridgelabz.dto.Registerdto;
@@ -45,8 +52,8 @@ import com.bridgelabz.utility.Utility;
 
 @Service
 public class ServiceImp implements com.bridgelabz.services.Service {
-   
-	static  Logger logger=LoggerFactory.getLogger(ServiceImp.class);
+
+	static Logger logger = LoggerFactory.getLogger(ServiceImp.class);
 	@Autowired
 	private Userrepo repo; // create object user repo
 
@@ -68,22 +75,18 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	@Autowired
 	RabbitTemplate template;
 	
-
-	@Autowired
-	private RedisTemplate<String,Object> redisTemp;
 	
+
 	/**
 	 * purpose: add new user detail in database if user add already recored then
 	 * show user email already existing & password store encrypt format
 	 */
-	
-	@Cacheable("/persons")
+
 //	@Value("${key}")
 //	private String key;
 	@Override
-	public String addNewUser(@Valid Registerdto regdto) {
+	public Response addNewUser(@Valid Registerdto regdto) {
 
-		
 		User user = mapper.map(regdto, User.class); // store new user data in mapper
 
 		if (repo.findAll().stream().anyMatch(i -> i.getEmail().equals(regdto.getEmail()))) // check user already
@@ -103,17 +106,17 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 
 		String token = tokenutility.createToken(user.getId());
-//	Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
-//	template.convertAndSend("userMessageQueue", body);
+		// Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
+		// template.convertAndSend("userMessageQueue", body);
 		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
-		//javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token, MessageReference.REGISTRATION_MAIL_TEXT)); // send
-	      logger.isWarnEnabled();
-	      
-	      String gettoken=tokenutility.getUserToken(token);
-	   // redisTemp.opsForValue().set(key, gettoken);
-		  
-	  	
-		return MessageReference.USER_ADD_SUCCESSFULLY;
+		// javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
+		// MessageReference.REGISTRATION_MAIL_TEXT)); // send
+		logger.isWarnEnabled();
+
+		String gettoken = tokenutility.getUserToken(token);
+		// redisTemp.opsForValue().set(key, gettoken);
+
+		return new Response(200, "User Registrtion ", MessageReference.USER_ADD_SUCCESSFULLY);
 	}
 
 	/**
@@ -140,38 +143,42 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	/**
 	 * Purpose : login user though email id or password
 	 */
-	
-	
+
+	@Cacheable(value = "user", key = "#token")
 	@Override
-	public String loginUser(@Valid Logindto loginDTO) {
-
+	public Response loginUser(Logindto loginDTO, String token) {
+		System.out.println("server");
+		System.out.println(loginDTO.getEmail());
 		User user = repo.findByEmail(loginDTO.getEmail()); // find email present or not
+		System.out.println(user);
 		if (user == null) {
-
-			return MessageReference.EMAIL_FAIL;
+			return new Response(200, "User Registrtion ", MessageReference.EMAIL_FAIL);
 
 		}
-
 		if (!user.isValidate()) {
 
 			new Validateuserexception(MessageReference.NOT_ACTIVE);
 		} else {
 			if (user.getEmail().equals(loginDTO.getEmail())
 					&& confing.encoder().matches(loginDTO.getPassword(), user.getPassword())) { // encode the user
-																								// password
-				return MessageReference.LOGIN_SUCCESSFULLY;
+				return new Response(200, "User Registrtion ", MessageReference.LOGIN_SUCCESSFULLY); // password
+
 			}
 		}
-		return MessageReference.LOGIN_NOT_SUCCESSFULLY;
+
+		return new Response(200, "User Registrtion ", MessageReference.LOGIN_NOT_SUCCESSFULLY);
+
 	}
 
 	/**
 	 * find user present or not if user found show user details
 	 */
 	@Override
-	public Optional<User> findByUser(String id) {
+	public Response findByUser(String id) {
 
-		return repo.findById(id); // find by user id in mongodb
+		return new Response(200, "User Registrtion ", repo.findById(id));
+
+		// find by user id in mongodb
 	}
 
 	/**
@@ -188,24 +195,25 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * purpose : delete particular user in database though user id
 	 */
 	@Override
-	public String deleteUser(String id) {
+	public Response deleteUser(String id) {
 		User user_id = repo.findById(id).get();
 		if (user_id == null) {
 			throw new Deleteexception(MessageReference.USER_ID_NOT_FOUND);
 		}
 		repo.deleteById(id); // delete user in db
 
-		return MessageReference.USER_DELETE_SUCCESSFULLY;
+		return new Response(200, "User Registrtion ", MessageReference.USER_DELETE_SUCCESSFULLY);
+
 	}
 
 	@Override
-	public String updateuser(User user, String id) {
+	public Response updateuser(User user, String id) {
 
 		User userupdate = repo.findById(id).get();
 
 		userupdate = user;
 		repo.save(userupdate);
-		return MessageReference.USER_UPDATE_SUCCESSFULLY;
+		return new Response(200, "User Registrtion ", MessageReference.USER_UPDATE_SUCCESSFULLY);
 
 	}
 
@@ -267,6 +275,65 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 		}
 
+	}
+
+	@Value("${path}")
+	private final Path filePath=null;
+	
+	@Override
+	public Response addProfile(MultipartFile file, String userid) throws IOException {
+
+		System.out.println(file);
+		Optional<User> getUser = repo.findById(userid);
+		if(getUser.isEmpty())
+		{
+			  throw new   Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		}
+			User user = getUser.get();
+		if (user != null && userid != null) {
+			if (file.getOriginalFilename().contains(".jpg") || file.getOriginalFilename().contains(".png")
+					|| file.getOriginalFilename().contains(".jpeg")) {
+				if (!file.isEmpty()) {
+					
+					File path = new File("\\home\\user\\Documents\\Springboot\\Fundoouser\\Profile\\");
+					path.createNewFile();
+					
+					FileOutputStream fo = new FileOutputStream(path);
+				    String pic = "\\home\\user\\Documents\\Springboot\\Fundoouser\\Profile\\" + file.getOriginalFilename();
+				
+					user.setProfile(pic);
+					fo.write(file.getBytes());
+					repo.save(user);
+
+				}
+			}
+		}
+
+		return new Response(200 ,"profile", MessageReference.USER_PROFILE_ADD);
+	}
+
+	@Override
+	public Response deleteProfile( String userid) {
+		
+		Optional<User> getUser=repo.findById(userid);
+		if(getUser.isEmpty()) {
+			throw new  Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		}
+		User user=getUser.get();
+		if(userid!=null && user!=null) {
+			
+			user.setProfile(null);
+			repo.save(user);
+		}
+		
+
+		return null;
+	}
+
+	@Override
+	public Response editProfile(MultipartFile file, String userid) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

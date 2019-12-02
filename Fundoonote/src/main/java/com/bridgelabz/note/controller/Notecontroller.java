@@ -31,10 +31,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
 import com.bridgelabz.note.response.Response;
@@ -73,7 +71,7 @@ public class Notecontroller {
 	@DeleteMapping("/deleteNote")
 	public ResponseEntity<Response> deleteNote(@RequestParam String id) {
 
-		return new ResponseEntity<Response>(noteServiceImp.deleteNote(id), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.deletePermanentNote(id), HttpStatus.OK);
 
 	}
 
@@ -142,15 +140,26 @@ public class Notecontroller {
 
 	}
 	
+	/**
+	 * @param title    search perticular tilte in  elastic search
+	 * @return         if title is found return  user note or not
+	 
+	 */
+	
 	@GetMapping("/searchbytitle")
 	public ResponseEntity<Response> searchdByTitle( @RequestParam String title) throws Exception {
-            
+       
 	
 		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByTitle(title), HttpStatus.OK);
 
 	}
+	/**
+	 * @param description   search perticular description in  elastic search
+	 * @return               if description is found return  user note or not
+	 * @throws Exception
+	 */
 	@GetMapping("/searchbyDescription")
-	public ResponseEntity<Response> searchdByDescription(@Valid @RequestParam String description) throws Exception {
+	public ResponseEntity<Response> searchdByDescription( @RequestParam String description) throws Exception {
 
 		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByDescription(description), HttpStatus.OK);
 		

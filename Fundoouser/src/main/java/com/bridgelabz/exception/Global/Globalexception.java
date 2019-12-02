@@ -15,12 +15,12 @@ import com.bridgelabz.response.Response;
 
 @ControllerAdvice
 public class Globalexception {
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Response> exception(Exception e) {
-
-		return new ResponseEntity<Response>(new Response(401, "internal server error", null),
-				HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Response> exception(Exception e) {
+//
+//		return new ResponseEntity<Response>(new Response(401, "internal server error", null),
+//				HttpStatus.INTERNAL_SERVER_ERROR);
+//	}
 
 	@ExceptionHandler(Loginexception.class)
 	public ResponseEntity<Response> loginException(Exception e) {

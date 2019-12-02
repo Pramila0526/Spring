@@ -16,16 +16,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import com.bridgelabz.note.dto.Labeldto;
 import com.bridgelabz.note.exception.custom.Labelnotfoundexception;
@@ -178,7 +173,6 @@ public class LabelserviceImp implements Labelservice {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 
 		}
-
 		labellist.add(label);
 		notelist.add(note);
 		label.setListOfNote(notelist);

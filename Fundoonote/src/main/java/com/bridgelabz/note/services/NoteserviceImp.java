@@ -16,20 +16,16 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
-
 import com.bridgelabz.note.exception.custom.Notenotfoundexception;
+import com.bridgelabz.note.exception.custom.Tokenexception;
 import com.bridgelabz.note.exception.custom.Usernotfoundexception;
 import com.bridgelabz.note.model.Notemodel;
 import com.bridgelabz.note.repo.Noterepository;
@@ -38,7 +34,7 @@ import com.bridgelabz.note.utility.Tokenutility;
 
 @Service
 public class NoteserviceImp implements Noteservice {
-	static  Logger logger=LoggerFactory.getLogger(LabelserviceImp.class);
+	static Logger logger = LoggerFactory.getLogger(LabelserviceImp.class);
 	@Autowired
 	Noterepository repo; // create Noterepository object
 
@@ -47,8 +43,7 @@ public class NoteserviceImp implements Noteservice {
 
 	@Autowired
 	Tokenutility tokenutility; // create Tokenutility object
-	
-	
+
 	@Autowired
 	ElasticsearchserviceImp elasticsearchserviceImp;
 
@@ -56,7 +51,7 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose add new user note
 	 */
 	/**
-	 * @throws IOException 
+	 * @throws IOException
 	 *
 	 */
 	@Override
@@ -69,13 +64,13 @@ public class NoteserviceImp implements Noteservice {
 		notemodel.setColor(notedto.getColor());
 		LocalDateTime datetime = LocalDateTime.now();
 		notemodel.setDate(datetime);
-		
+
 		String user_id = tokenutility.getUserToken(token);
-		
+
 		notemodel.setUserid(user_id);
-         
+
 		repo.save(notemodel);
-	
+
 		elasticsearchserviceImp.createDocuemnt(notemodel);
 		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
 	}
@@ -84,7 +79,7 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose delete perticular note
 	 */
 	@Override
-	public Response deleteNote(String id) {
+	public Response deletePermanentNote(String id) {
 
 		Notemodel note_id = repo.findById(id).get();
 		if (note_id == null) {
@@ -168,7 +163,6 @@ public class NoteserviceImp implements Noteservice {
 	 * sort note by date
 	 */
 	@Override
-//	public List<Notemodel> sortNoteByDate() {
 	public Response sortNoteByDate() {
 
 		List<Notemodel> note = showAllNote();
@@ -201,61 +195,73 @@ public class NoteserviceImp implements Noteservice {
 		return new Response(200, "add collbrator", "collabrator add successfully");
 
 	}
+	
+	
+	
 
 	@Override
 	public boolean archive(String token) {
 
-//		String userid = tokenutility.getUserToken(token);
-//		if (userid != null) {
-//			Notemodel note = (Notemodel) repo.findByUserid(userid);
-//			if (note != null) {
-//				note.setArchive(!(note.isArchive()));
-//				repo.save(note);
-//				return true;
-//
-//			}
-//		}
-		return false;
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Notemodel note = (Notemodel) repo.findByUserid(userid);
+		if (note == null) {
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
+
+		} else {
+			note.setArchive(!(note.isArchive()));
+			repo.save(note);
+			return true;
+
+		}
 	}
 
 	@Override
 	public boolean pin(String token) {
-//
-//		String userid = tokenutility.getUserToken(token);
-//		if (userid != null) {
-//			Notemodel note = (Notemodel) repo.findByUserid(userid);
-//			if (note != null) {
-//				note.setPin(!(note.isPin()));
-//				repo.save(note);
-//				return true;
-//
-//			}
-//		}
-		return false;
+
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+
+		Notemodel note = (Notemodel) repo.findByUserid(userid);
+		if (note == null) {
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
+
+		} else {
+			note.setPin(!(note.isPin()));
+			repo.save(note);
+			return true;
+
+		}
 	}
 
 	@Override
 	public boolean trash(String token) {
-//		String userid = tokenutility.getUserToken(token);
-//		if (userid != null) {
-//			Notemodel note = (Notemodel) repo.findByUserid(userid);
-//			if (note != null) {
-//				note.setTrash(!(note.isTrash()));
-//				repo.save(note);
-//				return true;
-//
-//			}
-//
-//		}
-		return false;
+
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Notemodel note = (Notemodel) repo.findByUserid(userid);
+
+		if (note == null) {
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
+
+		} else {
+			note.setTrash(!(note.isTrash()));
+			repo.save(note);
+			return true;
+
+		}
 	}
+	
+	
+	
 
 	
+
 	
-	@Override
-	public Response searchByTitle(String title) throws Exception {	
-		
-		
-		 return new Response(200,  "user title", elasticsearchserviceImp.searchByTitle(title));
-	}
 }

@@ -13,6 +13,7 @@
  ******************************************************************************/
 package com.bridgelabz.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,28 +25,27 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.bridgelabz.dto.Logindto;
 import com.bridgelabz.dto.Registerdto;
 import com.bridgelabz.dto.Setpassworddto;
 import com.bridgelabz.model.User;
-import com.bridgelabz.repo.Userrepo;
 import com.bridgelabz.response.Response;
 import com.bridgelabz.services.MessageReference;
 import com.bridgelabz.services.ServiceImp;
-import com.bridgelabz.utility.Utility;
+import org.springframework.web.multipart.*;
 
 @RestController
 @RequestMapping("/")
 public class UserController {
 
-	
-
 	@Autowired
-   private ServiceImp serviceimp;
+	private ServiceImp serviceimp;
 
 	/**
 	 * @param regdto registerdto store all user data in regdto
@@ -53,22 +53,21 @@ public class UserController {
 	 *         otherwise return not add
 	 */
 	@PostMapping("/addregister")
-	public Response addNewUser(@RequestBody Registerdto regDto) {
-		String result = serviceimp.addNewUser(regDto);
+	public ResponseEntity<Response> addNewUser(@RequestBody Registerdto regDto) {
 
-		return new Response(200, "Add new user", result); // give response for user 200 - ok
-															// message for user
-															// return final return
+		return new ResponseEntity<Response>(serviceimp.addNewUser(regDto), HttpStatus.OK); // give response for user 200
+																							// - ok
+		// message for user
+		// return final return
 	}
 
 	/**
 	 * @param id user give for show all own information give service imp class
 	 */
 	@GetMapping("/finduser")
-	public Response findByuser(@RequestParam String id) {
+	public ResponseEntity<Response> findByuser(@RequestParam String id) {
 
-		return new Response(200, "user data", serviceimp.findByUser(id));
-
+		return new ResponseEntity<Response>(serviceimp.findByUser(id), HttpStatus.OK);
 	}
 
 	/**
@@ -87,9 +86,9 @@ public class UserController {
 	 * @return if user is found delete successful response for user otherwise not
 	 */
 	@DeleteMapping("/delete")
-	public Response deleteUser(@RequestParam String id) {
-		String result = serviceimp.deleteUser(id);
-		return new Response(200, "delete user", result);
+	public ResponseEntity<Response> deleteUser(@RequestParam String id) {
+
+		return new ResponseEntity<Response>(serviceimp.deleteUser(id), HttpStatus.OK);
 
 	}
 
@@ -99,10 +98,12 @@ public class UserController {
 	 * @return if update return successful or not
 	 */
 	@PutMapping("/updateuser")
-	public Response updateuser(User user, @RequestParam String id) {
+	public ResponseEntity<Response>  updateuser(User user, @RequestParam String id) {
 
-		String result = serviceimp.updateuser(user, id);
-		return new Response(200, "update", result);
+		
+		
+		return new ResponseEntity<Response>(serviceimp.updateuser(user, id), HttpStatus.OK);
+		
 	}
 
 	/**
@@ -110,11 +111,10 @@ public class UserController {
 	 * @return if user user name & password is match return success or not
 	 */
 	@PostMapping("/login")
-	public Response loginUser(@RequestBody Logindto logindto) {
+	public ResponseEntity<Response> loginUser(@RequestBody Logindto logindto, @RequestParam String token) {
+		
+		return new ResponseEntity<Response>(serviceimp.loginUser(logindto, token), HttpStatus.OK);
 
-		String result = serviceimp.loginUser(logindto);
-
-		return new Response(200, "user login", result);
 
 	}
 
@@ -149,6 +149,18 @@ public class UserController {
 			@RequestBody Setpassworddto setpassworddto) {
 
 		return new ResponseEntity<Response>(serviceimp.setPassword(setpassworddto, token), HttpStatus.OK);
+	}
+	
+	
+	@PostMapping(value="/addprofile", consumes="multipart/form-data")
+	public ResponseEntity<Response> addProfile(MultipartFile file,@RequestHeader String userid) throws IOException{
+		return new ResponseEntity<Response>(serviceimp.addProfile(file, userid),HttpStatus.OK);
+	}
+	@DeleteMapping("/deleteprofile")
+	public ResponseEntity<Response> deleteProfile(@RequestParam String userid) {
+
+		return new ResponseEntity<Response>(serviceimp.deleteProfile(userid), HttpStatus.OK);
+
 	}
 
 }
