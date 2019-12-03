@@ -18,6 +18,7 @@ public class MessageReference {
 	
 	public static final String EMAIL_ALREADY_REGISTERED = "Email id already Registered";
 	public static final String EMAIL_CHECK="Email is not found";
+	public static final String USER_PROFILE_REMOVE="user profile remove successfully..";
 	public static final String USER_PROFILE_ADD="user profile add successfully..";
 	public static final String REGISTRATION_MAIL_TEXT ="\t validate your email\n"+"http://localhost:8080/validate?token=";
 	public static final String Verfiy_MAIL_TEXT ="\t Verficiaton email \n"+"http://localhost:8080/verfiy?token=";

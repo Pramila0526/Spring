@@ -1,13 +1,13 @@
 /******************************************************************************
- *  Compilation:  javac -d bin Tokenutility.java
+ *  Compilation:  javac -d bin LabelserviceImp.java
  *  Execution:    
  *               
  *  
- *  Purpose:       create  serviceimp class for note user
+ *  Purpose:       create serviceimp class for write all logic of note
  *
  *  @author  pandit walde
  *  @version 1.0
- *  @since  25-11-2019
+ *  @since  19-11-2019
  *
  ******************************************************************************/
 package com.bridgelabz.note.services;
@@ -15,7 +15,9 @@ package com.bridgelabz.note.services;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -177,6 +179,7 @@ public class NoteserviceImp implements Noteservice {
 	 * collabrator other user
 	 * 
 	 */
+	
 	@Override
 	public Response addCollabrator(Collabratordto collabratorDto) {
 
@@ -198,17 +201,21 @@ public class NoteserviceImp implements Noteservice {
 	
 	
 	
+	
 
+	/**
+	 *     purpose  create method for archive user note and label
+	 */
 	@Override
 	public boolean archive(String token) {
 
-		String userid = tokenutility.getUserToken(token);
+		String userid = tokenutility.getUserToken(token);  // if  token is invalid  then throw exception  invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
 		Notemodel note = (Notemodel) repo.findByUserid(userid);
 		if (note == null) {
-			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception user not found
 
 		} else {
 			note.setArchive(!(note.isArchive()));
@@ -218,37 +225,43 @@ public class NoteserviceImp implements Noteservice {
 		}
 	}
 
+	/**
+	 *  purpose  create method for pin unpin user note and label
+	 */
 	@Override
 	public boolean pin(String token) {
 
-		String userid = tokenutility.getUserToken(token);
+		String userid = tokenutility.getUserToken(token);   // if  token is invalid  then throw exception  invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
 
-		Notemodel note = (Notemodel) repo.findByUserid(userid);
+		Notemodel note = (Notemodel) repo.findByUserid(userid);  // if userid not found throw exception user not found
 		if (note == null) {
 			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
 
 		} else {
-			note.setPin(!(note.isPin()));
-			repo.save(note);
+			note.setPin(!(note.isPin()));    //if pin change if ture to false or false to ture
+			repo.save(note);   //store in db
 			return true;
 
 		}
 	}
 
+	/**
+	 *  purpose  create method for trash  store user note  retrive and delete
+	 */
 	@Override
 	public boolean trash(String token) {
 
-		String userid = tokenutility.getUserToken(token);
+		String userid = tokenutility.getUserToken(token);  // if  token is invalid  then throw exception  invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
 		Notemodel note = (Notemodel) repo.findByUserid(userid);
 
 		if (note == null) {
-			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception user not found
 
 		} else {
 			note.setTrash(!(note.isTrash()));
@@ -256,6 +269,46 @@ public class NoteserviceImp implements Noteservice {
 			return true;
 
 		}
+	}
+
+	/**
+	 *  purpose  create method for add reminder
+	 */
+	@Override
+	public Response addReminder(Date date, String noteid) {
+		 
+		Optional<Notemodel>id=repo.findById(noteid);		
+		if (id.isEmpty()) {
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception user not found
+
+		}
+		Notemodel note=id.get();   //get id  in db
+		
+		note.setRemider(date);   // set reminder 
+        repo.save(note);		
+		
+		
+		
+		return new Response(200, MessageReference.REMINDER_SET__SUCCESSFULLY, true);
+	}
+
+	/**
+	 * purpose  create method for remove reminder
+	 */
+	@Override
+	public Response removeReminder(String noteid) {
+		
+		Optional<Notemodel>id=repo.findById(noteid);		
+		if (id.isEmpty()) {
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception user not found
+
+		}
+        Notemodel note=id.get();  //get id in db
+		
+		note.setRemider(null);   //remove reminder
+        repo.save(note);		
+		
+        return new Response(200, MessageReference.REMINDER_DELETE__SUCCESSFULLY, true);
 	}
 	
 	

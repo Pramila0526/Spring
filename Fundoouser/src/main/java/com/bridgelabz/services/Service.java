@@ -15,9 +15,14 @@ package com.bridgelabz.services;
 
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bridgelabz.dto.Logindto;
@@ -48,8 +53,8 @@ public interface Service {
 	
 	public Response setPassword(Setpassworddto setPasswordDto,String token);   //create setPassword() method for set  new password particular user email
 	public Response addProfile(MultipartFile file,String userid) throws IOException;
-	public Response deleteProfile(String userid);
-	public Response editProfile(MultipartFile file,String userid);
+	public Response deleteProfile(String  profileName,String userid);
+	public ResponseEntity<Resource> getProfile( String userid,HttpServletRequest request ) throws MalformedURLException, IOException; 
 	
 	
 	                                                  

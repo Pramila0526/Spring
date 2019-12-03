@@ -28,7 +28,8 @@ public class MessageReference {
     public static final String LOGIN_SUCCESSFULLY="Login successfully";
     public static final String LOGIN_NOT_SUCCESSFULLY="Login failed";
     
-    
+    public static final String REMINDER_DELETE__SUCCESSFULLY="reminder delete  Successfully ";
+    public static final String REMINDER_SET__SUCCESSFULLY="reminder set  Successfully ";
     public static final String NOTE_ADD_SUCCESSFULLY="new Note add Successfully ";
     public static final String NOTE_DELETE_SUCCESSFULLY="Note delete Succssfully";
     public static final String NOTE_UPDATE_SUCCESSFULLY="Note update Succssfully";

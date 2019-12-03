@@ -1,3 +1,16 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin ElasticConfig.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       main purpose this class create for configuration elastic search
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since   3-12-2019
+ *
+ ******************************************************************************/
+
 package com.bridgelabz.note.config;
 
 import org.apache.http.HttpHost;
@@ -24,8 +37,11 @@ public class ElasticConfig {
 	@Value("http")
 	private String elasticsearchScheme;   //value annotation for http
   
+    /**
+     * @return    return response for client 
+     */
     @Bean
-	public RestHighLevelClient client() {
+	public RestHighLevelClient client() { // write client method for allow and bulid request and response  
 
 		RestHighLevelClient client = new RestHighLevelClient(
 				RestClient.builder(new HttpHost(elasticsearchHost, elasticsearchPort, elasticsearchScheme)));

@@ -20,6 +20,7 @@
 package com.bridgelabz.note.controller;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.validation.Valid;
 
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.note.dto.Collabratordto;
@@ -165,5 +167,26 @@ public class Notecontroller {
 		
 
 	}
+	/**
+	 * @param date    user provide date for stroing
+	 * @param noteid  which note want to remider it
+	 * @return        if reminder add return reminder add successfully or not
+	 */
+	@PutMapping("/addreminder")
+	public ResponseEntity<Response> addReminder(@RequestHeader Date date,@RequestParam String noteid){
+		System.out.println("controller");
+		return new ResponseEntity<Response>(noteServiceImp.addReminder(date, noteid),HttpStatus.OK);
+	}
+	/**
+	 * @param noteid    which note want delete a  reminder
+	 * @return          if reminder remove return reminder delete successfully or not  
+	 */
+	@DeleteMapping("/removereminder")
+	public ResponseEntity<Response> removeReminder(@RequestParam String noteid){
+		
+		return new ResponseEntity<Response>(noteServiceImp.removeReminder( noteid),HttpStatus.OK);
+	}
+	
+	
 
 }

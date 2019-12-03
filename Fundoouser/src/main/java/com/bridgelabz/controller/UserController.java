@@ -16,7 +16,10 @@ package com.bridgelabz.controller;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -152,15 +155,27 @@ public class UserController {
 	}
 	
 	
+	/**
+	 * @param file      
+	 * @param userid
+	 * @return
+	 * @throws IOException
+	 */
+	
 	@PostMapping(value="/addprofile", consumes="multipart/form-data")
 	public ResponseEntity<Response> addProfile(MultipartFile file,@RequestHeader String userid) throws IOException{
 		return new ResponseEntity<Response>(serviceimp.addProfile(file, userid),HttpStatus.OK);
 	}
 	@DeleteMapping("/deleteprofile")
-	public ResponseEntity<Response> deleteProfile(@RequestParam String userid) {
+	public ResponseEntity<Response> deleteProfile(@RequestParam String  profileName,@RequestParam String userid ) {
+         System.out.println("in controller");
+		return new ResponseEntity<Response>(serviceimp.deleteProfile( profileName,userid), HttpStatus.OK);
 
-		return new ResponseEntity<Response>(serviceimp.deleteProfile(userid), HttpStatus.OK);
-
+	}
+	@PutMapping("/getprofile")
+	public ResponseEntity<Resource> getProfile(@RequestHeader String userid,HttpServletRequest request) throws IOException{
+		
+		return serviceimp.getProfile(userid,request);
 	}
 
 }

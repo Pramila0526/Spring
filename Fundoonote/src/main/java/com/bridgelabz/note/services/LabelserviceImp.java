@@ -1,9 +1,9 @@
 /******************************************************************************
- *  Compilation:  javac -d bin Tokenutility.java
+ *  Compilation:  javac -d bin LabelserviceImp.java
  *  Execution:    
  *               
  *  
- *  Purpose:       create utility for jwt  response in  token
+ *  Purpose:       create serviceimp class for write all logic of label
  *
  *  @author  pandit walde
  *  @version 1.0

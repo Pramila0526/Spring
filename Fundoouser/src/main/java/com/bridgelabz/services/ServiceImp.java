@@ -15,10 +15,12 @@ package com.bridgelabz.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Path;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
@@ -29,7 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoProperties.Storage;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -74,7 +81,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Autowired
 	RabbitTemplate template;
-	
+	//private final String path = "/home/user/Documents/Springboot/Fundoouser/Profile/";
 	
 
 	/**
@@ -277,12 +284,12 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	}
 
-	@Value("${path}")
-	private final Path filePath=null;
-	
+	/**
+	 *   purpose 
+	 */
+		
 	@Override
-	public Response addProfile(MultipartFile file, String userid) throws IOException {
-
+	public Response addProfile(MultipartFile file, String userid) throws IOException { 
 		System.out.println(file);
 		Optional<User> getUser = repo.findById(userid);
 		if(getUser.isEmpty())
@@ -295,13 +302,16 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 					|| file.getOriginalFilename().contains(".jpeg")) {
 				if (!file.isEmpty()) {
 					
-					File path = new File("\\home\\user\\Documents\\Springboot\\Fundoouser\\Profile\\");
-					path.createNewFile();
 					
-					FileOutputStream fo = new FileOutputStream(path);
-				    String pic = "\\home\\user\\Documents\\Springboot\\Fundoouser\\Profile\\" + file.getOriginalFilename();
-				
+					   File filepath=new File("/home/user/Documents/Springboot/Fundoouser/Profile/"+file.getOriginalFilename());
+					   filepath.createNewFile();
+					   
+					
+					FileOutputStream fo = new FileOutputStream(file.getOriginalFilename());
+				    String pic =  file.getOriginalFilename();
+				    
 					user.setProfile(pic);
+					System.out.println(file.getBytes());
 					fo.write(file.getBytes());
 					repo.save(user);
 
@@ -313,27 +323,50 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	}
 
 	@Override
-	public Response deleteProfile( String userid) {
+	public Response deleteProfile(String  profileName, String userid) {
 		
 		Optional<User> getUser=repo.findById(userid);
 		if(getUser.isEmpty()) {
 			throw new  Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
 		}
 		User user=getUser.get();
-		if(userid!=null && user!=null) {
+		if(userid!=null && user!=null) {	
+			
+			
+			File filepath=new File("/home/user/Documents/Springboot/Fundoouser/Profile/"+profileName);
+			System.out.println(filepath);
+			   filepath.delete();
+			   
 			
 			user.setProfile(null);
 			repo.save(user);
 		}
 		
 
-		return null;
+		return new Response(200, MessageReference.USER_PROFILE_REMOVE, true);
 	}
 
 	@Override
-	public Response editProfile(MultipartFile file, String userid) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseEntity<Resource> getProfile( String userid,HttpServletRequest request ) throws IOException {
+		     Optional<User>id=repo.findById(userid);
+		     if(id.isEmpty()) {
+		    	 throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		     }
+		     User user=id.get();
+		     
+		     String  filepath=user.getProfile();
+			String path="/homeuser/Documents/Springboot/Fundoouser/Profile/"+filepath;
+			System.out.println(path);
+		   Path filePath = Paths.get(path);
+		   Resource resource=new UrlResource(filePath.toUri());
+		   String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+		   if(contentType==null)
+			   contentType="application/octate-stream";
+		   return ResponseEntity.ok()
+				   .contentType(MediaType.parseMediaType(contentType))
+				   .header(HttpHeaders.CONTENT_DISPOSITION,"attachment;filename=\""+resource.getFilename()+"\"")
+				   .body(resource);
+		   
 	}
 
 }

@@ -24,7 +24,7 @@ import com.bridgelabz.note.model.Notemodel;
 public interface Noterepository extends MongoRepository<Notemodel, Object> {  // create interface  and extends mongo  Repository
 	
 	
-	public List<Notemodel> findByUserid(String userid);
+	public List<Notemodel> findByUserid(String userid);    
 	public List<Notemodel> findByTitle(String title);
 	
 

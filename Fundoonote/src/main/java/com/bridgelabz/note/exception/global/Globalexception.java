@@ -1,3 +1,15 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Globalexception.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create  class handle global exception
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  3-12-2019
+ *
+ ******************************************************************************/
 package com.bridgelabz.note.exception.global;
 
 import org.springframework.http.HttpStatus;

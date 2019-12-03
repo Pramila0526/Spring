@@ -13,6 +13,7 @@
 package com.bridgelabz.note.model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -43,10 +44,8 @@ public class Notemodel {
 	private boolean pin;
 	private boolean trash;
 	private boolean archive;
-	private boolean remider;	
-	
-	private LocalDateTime date;
-	
+	private Date remider;	
+	private LocalDateTime date;	
 	private String userid;
 	private List<String > collabrators; //list use for collaborators other person
 	@JsonIgnore

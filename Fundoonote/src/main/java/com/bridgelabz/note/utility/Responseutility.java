@@ -1,3 +1,16 @@
+/******************************************************************************
+ *  Compilation:  javac -d bin Responseutility.java
+ *  Execution:    
+ *               
+ *  
+ *  Purpose:       create utility for  Rabbitmq
+ *
+ *  @author  pandit walde
+ *  @version 1.0
+ *  @since  19-11-2019
+ *
+ ******************************************************************************/
+
 package com.bridgelabz.note.utility;
 
 import java.util.List;
