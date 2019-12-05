@@ -33,9 +33,9 @@ import lombok.NoArgsConstructor;
 public class Labelmodel {
 	
 	@Id
-	private String label_id;
+	private String id;
 	private String lable_title;
-	private LocalDateTime created_date;
+	private LocalDateTime created_date= LocalDateTime.now();
 	private LocalDateTime updated_date;	
 	private String userid;     //add db in user id
 	
@@ -46,7 +46,7 @@ public class Labelmodel {
 	//create this list for many to many relationship between two class
 	@Override
 	public String toString() {
-		return "Labelmodel [label_id=" + label_id + ", lable_title=" + lable_title + ", created_date=" + created_date
+		return "Labelmodel [label_id=" + id + ", lable_title=" + lable_title + ", created_date=" + created_date
 				+ ", updated_date=" + updated_date + ", user_id=" + userid + "]";
 	}
 	

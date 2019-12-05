@@ -38,16 +38,13 @@ import com.bridgelabz.note.utility.Tokenutility;
 public class NoteserviceImp implements Noteservice {
 	static Logger logger = LoggerFactory.getLogger(LabelserviceImp.class);
 	@Autowired
-	Noterepository repo; // create Noterepository object
-
+	private Noterepository repo; // create Noterepository object
 	@Autowired
-	ModelMapper mapper; // create ModelMapper object
-
+	private ModelMapper mapper; // create ModelMapper object
 	@Autowired
-	Tokenutility tokenutility; // create Tokenutility object
-
+	private Tokenutility tokenutility; // create Tokenutility object
 	@Autowired
-	ElasticsearchserviceImp elasticsearchserviceImp;
+	private ElasticsearchserviceImp elasticsearchserviceImp;
 
 	/**
 	 * purpose add new user note
@@ -58,21 +55,11 @@ public class NoteserviceImp implements Noteservice {
 	 */
 	@Override
 	public Response createNote(Notedto notedto, String token) throws IOException {
-
-		Notemodel notemodel = mapper.map(notedto, Notemodel.class);
-
-		notemodel.setTitle(notedto.getTitle());
-		notemodel.setDescription(notedto.getDescription());
-		notemodel.setColor(notedto.getColor());
-		LocalDateTime datetime = LocalDateTime.now();
-		notemodel.setDate(datetime);
-
-		String user_id = tokenutility.getUserToken(token);
-
-		notemodel.setUserid(user_id);
-
+		
+		Notemodel notemodel = mapper.map(notedto, Notemodel.class);	    
+	    String user_id = tokenutility.getUserToken(token);
+	    notemodel.setUserid(user_id);		
 		repo.save(notemodel);
-
 		elasticsearchserviceImp.createDocuemnt(notemodel);
 		return new Response(200, "note add", MessageReference.NOTE_ADD_SUCCESSFULLY);
 	}
@@ -81,15 +68,17 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose delete perticular note
 	 */
 	@Override
-	public Response deletePermanentNote(String id) {
-
-		Notemodel note_id = repo.findById(id).get();
-		if (note_id == null) {
+	public Response deletePermanentNote(String noteid, String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
+		Notemodel note_id = id.get();
+		if (id.isEmpty()) {
 			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
-		System.out.println(note_id);
 		repo.delete(note_id);
-
 		return new Response(200, "note add", MessageReference.NOTE_DELETE_SUCCESSFULLY);
 
 	}
@@ -98,14 +87,13 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose Search a perticular user note
 	 */
 	@Override
-	public Response searchNote(String id) {
+	public Response searchNote(String noteid, String token) {
 
-		Notemodel note_id = repo.findById(id).get();
-		if (note_id == null) {
-			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
-
-		return new Response(200, "Note search", repo.findById(id));
+		return new Response(200, "Note search", repo.findByIdAndUserid(noteid, userid));
 
 	}
 
@@ -113,31 +101,37 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose show all user note
 	 */
 	@Override
-	public List<Notemodel> showAllNote() {
-
-		return repo.findAll();
+	public List<Notemodel> showAllNote(String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		List<Notemodel> list = repo.findByUserid(userid);
+		list.stream().filter(i -> !i.isTrash() && !i.isArchive()).collect(Collectors.toList());
+		return list;
 	}
 
 	/**
 	 * purpose update perticular Note
 	 */
 	@Override
-	public Response UpdateNote(Notedto notedto, String id) {
+	public Response UpdateNote(Notedto notedto, String noteid, String token) {
 
-		Notemodel updateNote = repo.findById(id).get();
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
 
-		if (updateNote == null) {
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
+		if (id.isEmpty()) {
 			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
-		System.out.println(notedto.getColor());
-		System.out.println(notedto.getDescription());
-		System.out.println(notedto.getTitle());
+		Notemodel updateNote = id.get();
 		updateNote.setColor(notedto.getColor());
 		updateNote.setDescription(notedto.getDescription());
 		updateNote.setTitle(notedto.getTitle());
 		LocalDateTime datetime = LocalDateTime.now();
 		updateNote.setDate(datetime);
-
 		repo.save(updateNote);
 
 		return new Response(200, "Note update", MessageReference.NOTE_UPDATE_SUCCESSFULLY);
@@ -148,15 +142,15 @@ public class NoteserviceImp implements Noteservice {
 	 * sort note by name
 	 */
 	@Override
-	public Response sortNoteByName() {
+	public Response sortNoteByName(String token) {
 
-		List<Notemodel> note = showAllNote();
+		List<Notemodel> note = showAllNote(token);
 		if (note.isEmpty()) {
 			return new Response(200, "sort by name", MessageReference.NOTE_IS_EMPTY);
 		}
-
-		note.stream().sorted((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()))
-				.collect(Collectors.toList());
+        
+		note.sort((note1, note2) -> note1.getTitle().compareTo(note2.getTitle()));
+	
 
 		return new Response(200, "Sort note by name", note);
 	}
@@ -165,13 +159,13 @@ public class NoteserviceImp implements Noteservice {
 	 * sort note by date
 	 */
 	@Override
-	public Response sortNoteByDate() {
+	public Response sortNoteByDate(String token) {
 
-		List<Notemodel> note = showAllNote();
+		List<Notemodel> note = showAllNote(token);
 		if (note.isEmpty()) {
 			return new Response(200, "sort by date", MessageReference.NOTE_IS_EMPTY);
 		}
-		note.stream().sorted((note1, note2) -> note1.getDate().compareTo(note2.getDate())).collect(Collectors.toList());
+		note.sort((note1, note2) -> note1.getDate().compareTo(note2.getDate()));
 		return new Response(200, "sort by date", note);
 	}
 
@@ -179,16 +173,22 @@ public class NoteserviceImp implements Noteservice {
 	 * collabrator other user
 	 * 
 	 */
-	
+
 	@Override
-	public Response addCollabrator(Collabratordto collabratorDto) {
+	public Response addCollabrator(Collabratordto collabratorDto, String token) {
 
-		Notemodel note = repo.findById(collabratorDto.getNoteId()).get();
-
-		if (note == null) {
-			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
 
+		Optional<Notemodel> id = repo.findByIdAndUserid(collabratorDto.getNoteId(), userid);
+		if (id.isEmpty()) {
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
+		}
+		Notemodel note = id.get();
+
+		 System.out.println(collabratorDto.getColaboratorId());
 		List<String> list = new ArrayList<String>();
 		list = note.getCollabrators();
 		list.add(collabratorDto.getColaboratorId());
@@ -198,123 +198,131 @@ public class NoteserviceImp implements Noteservice {
 		return new Response(200, "add collbrator", "collabrator add successfully");
 
 	}
-	
-	
-	
-	
 
+	@Override
+	public Response removeCollabrator(String email, String token) {
+		
+		String userid=tokenutility.getUserToken(token);
+		if(userid.isEmpty()) {throw new Tokenexception(MessageReference.INVALID_TOKEN);}
+		List<Notemodel> list=repo.findByUserid(userid);
+		System.out.println(list);
+		
+	
+		return new Response(200, "collabrator remove succssfully", true);
+	}
 	/**
-	 *     purpose  create method for archive user note and label
+	 * purpose create method for archive user note and label
 	 */
 	@Override
-	public boolean archive(String token) {
+	public Response archive(String token, String noteid) {
 
-		String userid = tokenutility.getUserToken(token);  // if  token is invalid  then throw exception  invalid token
+		String userid = tokenutility.getUserToken(token); // if token is invalid then throw exception invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
-		Notemodel note = (Notemodel) repo.findByUserid(userid);
-		if (note == null) {
-			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception user not found
+
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
+
+		if (id.isEmpty()) {
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception
+																					// user not found
 
 		} else {
+			Notemodel note = id.get();
 			note.setArchive(!(note.isArchive()));
 			repo.save(note);
-			return true;
+			return new Response(200, "archive change", true);
 
 		}
 	}
 
 	/**
-	 *  purpose  create method for pin unpin user note and label
+	 * purpose create method for pin unpin user note and label
 	 */
 	@Override
-	public boolean pin(String token) {
-
-		String userid = tokenutility.getUserToken(token);   // if  token is invalid  then throw exception  invalid token
+	public Response pin(String token, String noteid) {
+		String userid = tokenutility.getUserToken(token); // if token is invalid then throw exception invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
 
-		Notemodel note = (Notemodel) repo.findByUserid(userid);  // if userid not found throw exception user not found
-		if (note == null) {
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
+		Notemodel note = id.get(); // if userid not found throw exception user not found
+		if (id.isEmpty()) {
 			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND);
 
 		} else {
-			note.setPin(!(note.isPin()));    //if pin change if ture to false or false to ture
-			repo.save(note);   //store in db
-			return true;
+			note.setPin(!(note.isPin())); // if pin change if ture to false or false to ture
+			repo.save(note); // store in db
+			return new Response(200, "pin change", true);
 
 		}
 	}
 
 	/**
-	 *  purpose  create method for trash  store user note  retrive and delete
+	 * purpose create method for trash store user note retrive and delete
 	 */
 	@Override
-	public boolean trash(String token) {
+	public Response trash(String token, String noteid) {
 
-		String userid = tokenutility.getUserToken(token);  // if  token is invalid  then throw exception  invalid token
+		String userid = tokenutility.getUserToken(token); // if token is invalid then throw exception invalid token
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
-		Notemodel note = (Notemodel) repo.findByUserid(userid);
-
-		if (note == null) {
-			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception user not found
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
+		Notemodel note = id.get();
+		if (id.isEmpty()) {
+			throw new Usernotfoundexception(MessageReference.USER_ID_NOT_FOUND); // if userid not found throw exception
+																					// user not found
 
 		} else {
 			note.setTrash(!(note.isTrash()));
 			repo.save(note);
-			return true;
+			return new Response(200, "trash change", true);
 
 		}
 	}
 
 	/**
-	 *  purpose  create method for add reminder
+	 * purpose create method for add reminder
 	 */
 	@Override
-	public Response addReminder(Date date, String noteid) {
-		 
-		Optional<Notemodel>id=repo.findById(noteid);		
+	public Response addReminder(Date date, String noteid, String token) {
+		String userid = tokenutility.getUserToken(token);
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
 		if (id.isEmpty()) {
-			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception user not found
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception
+																					// user not found
 
 		}
-		Notemodel note=id.get();   //get id  in db
-		
-		note.setRemider(date);   // set reminder 
-        repo.save(note);		
-		
-		
-		
+		Notemodel note = id.get(); // get id in db
+
+		note.setRemider(date); // set reminder
+		repo.save(note);
+
 		return new Response(200, MessageReference.REMINDER_SET__SUCCESSFULLY, true);
 	}
 
 	/**
-	 * purpose  create method for remove reminder
+	 * purpose create method for remove reminder
 	 */
 	@Override
-	public Response removeReminder(String noteid) {
-		
-		Optional<Notemodel>id=repo.findById(noteid);		
+	public Response removeReminder(String noteid, String token) {
+		String userid = tokenutility.getUserToken(token);
+		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
 		if (id.isEmpty()) {
-			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception user not found
+			throw new Usernotfoundexception(MessageReference.NOTE_ID_NOT_FOUND); // if userid not found throw exception
+																					// user not found
 
 		}
-        Notemodel note=id.get();  //get id in db
-		
-		note.setRemider(null);   //remove reminder
-        repo.save(note);		
-		
-        return new Response(200, MessageReference.REMINDER_DELETE__SUCCESSFULLY, true);
+		Notemodel note = id.get(); // get id in db
+
+		note.setRemider(null); // remove reminder
+		repo.save(note);
+
+		return new Response(200, MessageReference.REMINDER_DELETE__SUCCESSFULLY, true);
 	}
-	
-	
-	
 
 	
 
-	
 }

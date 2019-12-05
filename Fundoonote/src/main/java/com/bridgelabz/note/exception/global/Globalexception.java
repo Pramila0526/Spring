@@ -26,12 +26,12 @@ import com.bridgelabz.note.response.Response;
 
 @ControllerAdvice
 public class Globalexception {
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Response> exception(Exception e){
-		
-		return new ResponseEntity<Response>(new Response(401,e.getMessage(),null),HttpStatus.INTERNAL_SERVER_ERROR);
-		
-	}
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Response> exception(Exception e){
+//		
+//		return new ResponseEntity<Response>(new Response(401,e.getMessage(),null),HttpStatus.INTERNAL_SERVER_ERROR);
+//		
+//	}
 	
 	@ExceptionHandler(Labelnotfoundexception.class)
 	public ResponseEntity<Response> labelNotFoundException(Exception e){

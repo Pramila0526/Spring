@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +44,7 @@ import com.bridgelabz.note.services.LabelserviceImp;
  *
  */
 @RestController
-
+@RequestMapping("/")
 public class LabelController {
 
 	@Autowired
@@ -53,10 +55,10 @@ public class LabelController {
 	 * @param token    give user token
 	 * @return if label add send response to user label add successfully
 	 */
-	@PostMapping("/addLabel")
-	public ResponseEntity<Response> labelAdd(@Valid @RequestBody Labeldto labelDto, @RequestParam String token) {
-
-		lableServiceImp.labelAdd(labelDto, token);
+	@PostMapping("/label")
+	public ResponseEntity<Response> labelAdd(@Valid @RequestBody Labeldto labelDto, @RequestHeader String token) {
+         
+		
 		return new ResponseEntity<Response>(lableServiceImp.labelAdd(labelDto, token), HttpStatus.OK);
 
 	}
@@ -65,10 +67,10 @@ public class LabelController {
 	 * @param id user provide id for which use user want to delete
 	 * @return if label delete send response to user label delete successfully
 	 */
-	@DeleteMapping("/deleteLabel")
-	public ResponseEntity<Response> labelDelete(@Valid @RequestParam String id) {
+	@DeleteMapping("/label")
+	public ResponseEntity<Response> labelDelete(@Valid @RequestParam String id, @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(lableServiceImp.labelDelete(id), HttpStatus.OK);
+		return new ResponseEntity<Response>(lableServiceImp.labelDelete(id, token), HttpStatus.OK);
 
 	}
 
@@ -77,10 +79,10 @@ public class LabelController {
 	 * @param id       user provide id for which use user want to update a record
 	 * @return if label update send response to user label update successfully
 	 */
-	@PutMapping("/updatLabel")
-	public ResponseEntity<Response> labelUpdate(@Valid @RequestBody Labeldto labeldto, @RequestParam String id) {
+	@PutMapping("/label")
+	public ResponseEntity<Response> labelUpdate(@Valid @RequestBody Labeldto labeldto, @RequestParam String id, @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(lableServiceImp.labelUpdate(labeldto, id), HttpStatus.OK);
+		return new ResponseEntity<Response>(lableServiceImp.labelUpdate(labeldto, id, token), HttpStatus.OK);
 
 	}
 
@@ -88,20 +90,20 @@ public class LabelController {
 	 * @param id user provide id for which use user want to search record
 	 * @return retrun the user found record
 	 */
-	@GetMapping("/searchLabel")
-	public ResponseEntity<Response> searchLabel(@Valid @RequestParam String id) {
-            System.out.println("Dddgggtgfgrr");
-		return new ResponseEntity<Response>(lableServiceImp.labelSearch(id), HttpStatus.OK);
+	@GetMapping("/searchlabel")
+	public ResponseEntity<Response> searchLabel(@Valid @RequestParam String id, @RequestHeader String token) {
+		System.out.println("Dddgggtgfgrr");
+		return new ResponseEntity<Response>(lableServiceImp.labelSearch(id, token), HttpStatus.OK);
 
 	}
 
 	/**
 	 * @return return all user details
 	 */
-	@GetMapping("/showallabel")
-	public Response showAllLabel() {
+	@GetMapping("/label")
+	public Response showAllLabel(@RequestHeader String token) {
 
-		return new Response(200, " all lable ", lableServiceImp.labelShowAll());
+		return new Response(200, " all lable ", lableServiceImp.labelShowAll(token));
 	}
 
 	/**
@@ -109,9 +111,9 @@ public class LabelController {
 	 * @return if user id found return it
 	 */
 	@PostMapping("/findLabelbyuserid")
-	public ResponseEntity<Response> findByUserid(@Valid @RequestParam String userid) {
+	public ResponseEntity<Response> findByUserid(@Valid @RequestParam String userid, @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(lableServiceImp.findLabelByUser_id(userid), HttpStatus.OK);
+		return new ResponseEntity<Response>(lableServiceImp.findLabelByUser_id(userid, token), HttpStatus.OK);
 
 	}
 
@@ -121,10 +123,10 @@ public class LabelController {
 	 * @return if assign note to label return sucess message
 	 */
 
-	@PostMapping("/manytomany")
-	public ResponseEntity<Response> manyToMany(@Valid @RequestParam String noteid, @RequestParam String labelid) {
+	@PutMapping("/manytomany")
+	public ResponseEntity<Response> manyToMany(@Valid @RequestParam String noteid, @RequestParam String labelid , @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(lableServiceImp.manyToMany(noteid, labelid), HttpStatus.OK);
+		return new ResponseEntity<Response>(lableServiceImp.manyToMany(noteid, labelid, token), HttpStatus.OK);
 
 	}
 

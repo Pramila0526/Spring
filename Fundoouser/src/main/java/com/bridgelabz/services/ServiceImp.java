@@ -15,25 +15,19 @@ package com.bridgelabz.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.util.List;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoProperties.Storage;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,13 +35,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.bridgelabz.config.Passwordconfig;
 import com.bridgelabz.dto.Logindto;
 import com.bridgelabz.dto.Registerdto;
 import com.bridgelabz.dto.Setpassworddto;
 import com.bridgelabz.exception.Custom.Forgotpasswordexception;
 import com.bridgelabz.exception.Custom.Registrationexcepton;
+import com.bridgelabz.exception.Custom.Tokenexception;
 import com.bridgelabz.exception.Custom.Validateuserexception;
 import com.bridgelabz.exception.Custom.Deleteexception;
 import com.bridgelabz.model.Rabbitmqmodel;
@@ -81,8 +75,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Autowired
 	RabbitTemplate template;
-	//private final String path = "/home/user/Documents/Springboot/Fundoouser/Profile/";
-	
+	// private final String path =
+	// "/home/user/Documents/Springboot/Fundoouser/Profile/";
 
 	/**
 	 * purpose: add new user detail in database if user add already recored then
@@ -93,9 +87,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 //	private String key;
 	@Override
 	public Response addNewUser(@Valid Registerdto regdto) {
-
+            System.out.println(regdto.getEmail());
 		User user = mapper.map(regdto, User.class); // store new user data in mapper
-
 		if (repo.findAll().stream().anyMatch(i -> i.getEmail().equals(regdto.getEmail()))) // check user already
 																							// existing or not
 		{
@@ -113,14 +106,14 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 
 		String token = tokenutility.createToken(user.getId());
-		// Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
-		// template.convertAndSend("userMessageQueue", body);
-		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
-		// javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
-		// MessageReference.REGISTRATION_MAIL_TEXT)); // send
+		Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
+		template.convertAndSend("userMessageQueue", body);
+		//javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
+	//	javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
+	//	MessageReference.REGISTRATION_MAIL_TEXT)); // send
 		logger.isWarnEnabled();
 
-		String gettoken = tokenutility.getUserToken(token);
+		// String gettoken = tokenutility.getUserToken(token);
 		// redisTemp.opsForValue().set(key, gettoken);
 
 		return new Response(200, "User Registrtion ", MessageReference.USER_ADD_SUCCESSFULLY);
@@ -133,7 +126,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	public Response valivateUser(String token) {
 
-		String userid = tokenutility.getUserToken(token); // get user id from user token
+		String userid = tokenutility.getUserToken(token); // get user id from user token.
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
 
 		User user = repo.findById(userid).get(); // check userid present or not
 		if (user != null) { // if userid is found validate should be true
@@ -153,7 +149,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Cacheable(value = "user", key = "#token")
 	@Override
-	public Response loginUser(Logindto loginDTO, String token) {
+	public Response loginUser(Logindto loginDTO) {
 		System.out.println("server");
 		System.out.println(loginDTO.getEmail());
 		User user = repo.findByEmail(loginDTO.getEmail()); // find email present or not
@@ -162,13 +158,14 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			return new Response(200, "User Registrtion ", MessageReference.EMAIL_FAIL);
 
 		}
+		String token = tokenutility.getUserToken(user.getId());
 		if (!user.isValidate()) {
 
 			new Validateuserexception(MessageReference.NOT_ACTIVE);
 		} else {
 			if (user.getEmail().equals(loginDTO.getEmail())
 					&& confing.encoder().matches(loginDTO.getPassword(), user.getPassword())) { // encode the user
-				return new Response(200, "User Registrtion ", MessageReference.LOGIN_SUCCESSFULLY); // password
+				return new Response(200, MessageReference.LOGIN_SUCCESSFULLY, token); // password
 
 			}
 		}
@@ -181,9 +178,13 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * find user present or not if user found show user details
 	 */
 	@Override
-	public Response findByUser(String id) {
+	public Response findByUser(String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
 
-		return new Response(200, "User Registrtion ", repo.findById(id));
+		return new Response(200, "User Registrtion ", repo.findById(userid));
 
 		// find by user id in mongodb
 	}
@@ -193,7 +194,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 *
 	 */
 	@Override
-	public List<User> Show() {
+	public List<User> Show(String token) {
 
 		return repo.findAll(); // show all user details in mongodb
 	}
@@ -202,11 +203,16 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * purpose : delete particular user in database though user id
 	 */
 	@Override
-	public Response deleteUser(String id) {
-		User user_id = repo.findById(id).get();
+	public Response deleteUser(String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Optional<User> user_id = repo.findById(userid);
 		if (user_id == null) {
 			throw new Deleteexception(MessageReference.USER_ID_NOT_FOUND);
 		}
+		User id = user_id.get();
 		repo.deleteById(id); // delete user in db
 
 		return new Response(200, "User Registrtion ", MessageReference.USER_DELETE_SUCCESSFULLY);
@@ -214,9 +220,12 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	}
 
 	@Override
-	public Response updateuser(User user, String id) {
-
-		User userupdate = repo.findById(id).get();
+	public Response updateuser(User user, String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		User userupdate = repo.findById(userid).get();
 
 		userupdate = user;
 		repo.save(userupdate);
@@ -237,7 +246,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * verify user email id
 	 */
 	@Override
-	public Response findEmail(String email) {
+	public Response findEmail(String email, String token) {
 
 		User user = repo.findByEmail(email); // find by user email id
 
@@ -248,10 +257,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 		} else {
 
-			String token = tokenutility.createToken(user.getId()); // user id of user
-			Rabbitmqmodel body = Utility.getRabbitMq(email, token);
+			String token1 = tokenutility.createToken(user.getId()); // user id of user
+			Rabbitmqmodel body = Utility.getRabbitMq(email, token1);
 			template.convertAndSend("userMessageQueue", body);
-			javaMailSender.send(Utility.verifyUserMail(email, token, MessageReference.Verfiy_MAIL_TEXT)); // send email
+			javaMailSender.send(Utility.verifyUserMail(email, token1, MessageReference.Verfiy_MAIL_TEXT)); // send email
 																											// from user
 																											// email id
 
@@ -285,31 +294,27 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	}
 
 	/**
-	 *   purpose 
+	 * purpose
 	 */
-		
+
 	@Override
-	public Response addProfile(MultipartFile file, String userid) throws IOException { 
-		System.out.println(file);
+	public Response addProfile(MultipartFile file, String token) throws IOException {
+		String userid = tokenutility.getUserToken(token);
 		Optional<User> getUser = repo.findById(userid);
-		if(getUser.isEmpty())
-		{
-			  throw new   Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		if (getUser.isEmpty()) {
+			throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
 		}
-			User user = getUser.get();
+		User user = getUser.get();
 		if (user != null && userid != null) {
 			if (file.getOriginalFilename().contains(".jpg") || file.getOriginalFilename().contains(".png")
 					|| file.getOriginalFilename().contains(".jpeg")) {
 				if (!file.isEmpty()) {
-					
-					
-					   File filepath=new File("/home/user/Documents/Springboot/Fundoouser/Profile/"+file.getOriginalFilename());
-					   filepath.createNewFile();
-					   
-					
+
+					File filepath = new File(
+							"/home/user/Documents/Springboot/Fundoouser/Profile/" + file.getOriginalFilename());
+					filepath.createNewFile();
 					FileOutputStream fo = new FileOutputStream(file.getOriginalFilename());
-				    String pic =  file.getOriginalFilename();
-				    
+					String pic = file.getOriginalFilename();
 					user.setProfile(pic);
 					System.out.println(file.getBytes());
 					fo.write(file.getBytes());
@@ -319,54 +324,57 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			}
 		}
 
-		return new Response(200 ,"profile", MessageReference.USER_PROFILE_ADD);
+		return new Response(200, "profile", MessageReference.USER_PROFILE_ADD);
 	}
 
 	@Override
-	public Response deleteProfile(String  profileName, String userid) {
-		
-		Optional<User> getUser=repo.findById(userid);
-		if(getUser.isEmpty()) {
-			throw new  Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+	public Response deleteProfile(String profileName, String token) {
+		String userid = tokenutility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
-		User user=getUser.get();
-		if(userid!=null && user!=null) {	
-			
-			
-			File filepath=new File("/home/user/Documents/Springboot/Fundoouser/Profile/"+profileName);
+		Optional<User> getUser = repo.findById(userid);
+		if (getUser.isEmpty()) {
+			throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		}
+		User user = getUser.get();
+		if (userid != null && user != null) {
+
+			File filepath = new File("/home/user/Documents/Springboot/Fundoouser/Profile/" + profileName);
 			System.out.println(filepath);
-			   filepath.delete();
-			   
-			
+			filepath.delete();
+
 			user.setProfile(null);
 			repo.save(user);
 		}
-		
 
 		return new Response(200, MessageReference.USER_PROFILE_REMOVE, true);
 	}
 
 	@Override
-	public ResponseEntity<Resource> getProfile( String userid,HttpServletRequest request ) throws IOException {
-		     Optional<User>id=repo.findById(userid);
-		     if(id.isEmpty()) {
-		    	 throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
-		     }
-		     User user=id.get();
-		     
-		     String  filepath=user.getProfile();
-			String path="/homeuser/Documents/Springboot/Fundoouser/Profile/"+filepath;
-			System.out.println(path);
-		   Path filePath = Paths.get(path);
-		   Resource resource=new UrlResource(filePath.toUri());
-		   String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-		   if(contentType==null)
-			   contentType="application/octate-stream";
-		   return ResponseEntity.ok()
-				   .contentType(MediaType.parseMediaType(contentType))
-				   .header(HttpHeaders.CONTENT_DISPOSITION,"attachment;filename=\""+resource.getFilename()+"\"")
-				   .body(resource);
-		   
+	public ResponseEntity<Resource> getProfile(String userid, HttpServletRequest request) throws IOException {
+		Optional<User> id = repo.findById(userid);
+		if (id.isEmpty()) {
+			throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
+		}
+		User user = id.get();
+
+		String filepath = user.getProfile();
+		String path = "/homeuser/Documents/Springboot/Fundoouser/Profile/" + filepath;
+		System.out.println("1");
+		Path filePath = Paths.get(path);
+		System.out.println("2");
+		Resource resource = new UrlResource(filePath.toUri());
+		System.out.println("3");
+		String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+		System.out.println("4");
+		if (contentType == null)
+			contentType = "application/octate-stream";
+		System.out.println("5");
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
+
 	}
 
 }

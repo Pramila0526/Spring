@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.note.dto.Collabratordto;
@@ -42,26 +43,25 @@ import com.bridgelabz.note.services.ElasticsearchserviceImp;
 import com.bridgelabz.note.services.NoteserviceImp;
 
 @RestController
-//@RequestMapping("/")
+@RequestMapping("/")
 public class Notecontroller {
 
 	@Autowired
-	NoteserviceImp noteServiceImp;
+	private NoteserviceImp noteServiceImp;
 
 	@Autowired
-	ElasticsearchserviceImp elasticsearchserviceImp;
+	private ElasticsearchserviceImp elasticsearchserviceImp;
 
 	/**
 	 * @param notedto create note for user
 	 * @param token   user token
 	 * @return if note is create return add note successfully
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	@PostMapping("/addNote")
-	public ResponseEntity<Response> createNote(@Valid @RequestBody Notedto notedto, @RequestParam String token) throws IOException {
+	@PostMapping("/note")
+	public ResponseEntity<Response> createNote(@Valid @RequestBody Notedto notedto, @RequestHeader String token)
+			throws IOException {
 
-		System.out.println("token:" + token);
-		noteServiceImp.createNote(notedto, token);
 		return new ResponseEntity<Response>(noteServiceImp.createNote(notedto, token), HttpStatus.OK);
 
 	}
@@ -70,10 +70,10 @@ public class Notecontroller {
 	 * @param id which note you want delete it
 	 * @return if note delete return delete successfully.
 	 */
-	@DeleteMapping("/deleteNote")
-	public ResponseEntity<Response> deleteNote(@RequestParam String id) {
+	@DeleteMapping("/note")
+	public ResponseEntity<Response> deleteNote(@RequestParam String id, @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.deletePermanentNote(id), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.deletePermanentNote(id, token), HttpStatus.OK);
 
 	}
 
@@ -81,10 +81,10 @@ public class Notecontroller {
 	 * @param id search the particular note in db through by id
 	 * @return if record is found return it.
 	 */
-	@GetMapping("/findNote")
-	public ResponseEntity<Response> findNote(@Valid @RequestParam String id) {
+	@GetMapping("/searchnote")
+	public ResponseEntity<Response> searchNote(@Valid @RequestParam String id, @RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.searchNote(id), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.searchNote(id, token), HttpStatus.OK);
 
 	}
 
@@ -92,10 +92,10 @@ public class Notecontroller {
 	 * @return return all note for user
 	 */
 
-	@GetMapping("/shownote")
-	public Response showAllNote() {
+	@GetMapping("/note")
+	public Response showAllNote(@RequestHeader String token) {
 
-		return new Response(200, "show all note", noteServiceImp.showAllNote());
+		return new Response(200, "show all note", noteServiceImp.showAllNote(token));
 
 	}
 
@@ -104,10 +104,11 @@ public class Notecontroller {
 	 * @param id      user want which note to update a details
 	 * @return if note it update return update successfully.
 	 */
-	@PutMapping("/updateNote")
-	public ResponseEntity<Response> updateNote(@Valid @RequestBody Notedto notedto, @RequestParam String id) {
+	@PutMapping("/note")
+	public ResponseEntity<Response> updateNote(@Valid @RequestBody Notedto notedto, @RequestParam String id,
+			@RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.UpdateNote(notedto, id), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.UpdateNote(notedto, id, token), HttpStatus.OK);
 
 	}
 
@@ -115,9 +116,9 @@ public class Notecontroller {
 	 * @return return all sorted note by date
 	 */
 	@GetMapping("/sortnotebyname")
-	public ResponseEntity<Response> sortNoteByName() {
+	public ResponseEntity<Response> sortNoteByName(@RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.sortNoteByName(), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.sortNoteByName(token), HttpStatus.OK);
 
 	}
 
@@ -125,9 +126,9 @@ public class Notecontroller {
 	 * @return return all sorted note by name
 	 */
 	@GetMapping("/sortnotebydate")
-	public ResponseEntity<Response> sortNoteByDate() {
+	public ResponseEntity<Response> sortNoteByDate(@RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.sortNoteByDate(), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.sortNoteByDate(token), HttpStatus.OK);
 
 	}
 
@@ -136,57 +137,81 @@ public class Notecontroller {
 	 * @return if other user is collaborate return add collabrator successfully
 	 */
 	@PutMapping("/addcollbrator")
-	public ResponseEntity<Response> addCollbrator(@Valid @RequestBody Collabratordto collabratorDto) {
+	public ResponseEntity<Response> addCollbrator(@Valid @RequestBody Collabratordto collabratorDto,
+			@RequestHeader String token) {
 
-		return new ResponseEntity<Response>(noteServiceImp.addCollabrator(collabratorDto), HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.addCollabrator(collabratorDto, token), HttpStatus.OK);
 
 	}
-	
+	@DeleteMapping("/removecollbrator")
+	public ResponseEntity<Response>removeCollbrator(@RequestParam String email,@RequestHeader String token){
+		
+		return new ResponseEntity<Response>(noteServiceImp.removeCollabrator(email, token),HttpStatus.OK); 
+	}
+
 	/**
-	 * @param title    search perticular tilte in  elastic search
-	 * @return         if title is found return  user note or not
-	 
+	 * @param title search perticular tilte in elastic search
+	 * @return if title is found return user note or not
+	 * 
 	 */
-	
+
 	@GetMapping("/searchbytitle")
-	public ResponseEntity<Response> searchdByTitle( @RequestParam String title) throws Exception {
-       
-	
+	public ResponseEntity<Response> searchdByTitle(@RequestParam String title) throws Exception {
+
 		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByTitle(title), HttpStatus.OK);
 
 	}
+
 	/**
-	 * @param description   search perticular description in  elastic search
-	 * @return               if description is found return  user note or not
+	 * @param description search perticular description in elastic search
+	 * @return if description is found return user note or not
 	 * @throws Exception
 	 */
 	@GetMapping("/searchbyDescription")
-	public ResponseEntity<Response> searchdByDescription( @RequestParam String description) throws Exception {
+	public ResponseEntity<Response> searchdByDescription(@RequestParam String description) throws Exception {
 
 		return new ResponseEntity<Response>(elasticsearchserviceImp.searchByDescription(description), HttpStatus.OK);
-		
 
 	}
+
 	/**
-	 * @param date    user provide date for stroing
-	 * @param noteid  which note want to remider it
-	 * @return        if reminder add return reminder add successfully or not
+	 * @param date   user provide date for stroing
+	 * @param noteid which note want to remider it
+	 * @return if reminder add return reminder add successfully or not
 	 */
 	@PutMapping("/addreminder")
-	public ResponseEntity<Response> addReminder(@RequestHeader Date date,@RequestParam String noteid){
+	public ResponseEntity<Response> addReminder(@RequestHeader Date date, @RequestParam String noteid,
+			@RequestHeader String token) {
 		System.out.println("controller");
-		return new ResponseEntity<Response>(noteServiceImp.addReminder(date, noteid),HttpStatus.OK);
+		return new ResponseEntity<Response>(noteServiceImp.addReminder(date, noteid, token), HttpStatus.OK);
 	}
+
 	/**
-	 * @param noteid    which note want delete a  reminder
-	 * @return          if reminder remove return reminder delete successfully or not  
+	 * @param noteid which note want delete a reminder
+	 * @return if reminder remove return reminder delete successfully or not
 	 */
 	@DeleteMapping("/removereminder")
-	public ResponseEntity<Response> removeReminder(@RequestParam String noteid){
-		
-		return new ResponseEntity<Response>(noteServiceImp.removeReminder( noteid),HttpStatus.OK);
+	public ResponseEntity<Response> removeReminder(@RequestParam String noteid, @RequestHeader String token) {
+
+		return new ResponseEntity<Response>(noteServiceImp.removeReminder(noteid, token), HttpStatus.OK);
 	}
-	
-	
+
+	@PutMapping("/pinunpin")
+	public ResponseEntity<Response> pinUnpin(@RequestParam String token, @RequestParam String noteid) {
+
+		return new ResponseEntity<Response>(noteServiceImp.pin(token, noteid), HttpStatus.OK);
+	}
+
+	@PutMapping("/trash")
+	public ResponseEntity<Response> trash(@RequestParam String token, @RequestParam String noteid) {
+
+		return new ResponseEntity<Response>(noteServiceImp.trash(token, noteid), HttpStatus.OK);
+	}
+
+	@PutMapping("/archive")
+	public ResponseEntity<Response> archvie(@RequestParam String token, @RequestParam String noteid) {
+
+		return new ResponseEntity<Response>(noteServiceImp.trash(token, noteid), HttpStatus.OK);
+	}
 
 }

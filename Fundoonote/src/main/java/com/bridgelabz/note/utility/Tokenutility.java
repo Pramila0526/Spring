@@ -51,8 +51,7 @@ public class Tokenutility {
 		try {
 		    System.out.println("token :-"+token);
 		    claim = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-	          
-		     System.out.println(claim.getSubject());
+	         
 		    
 		    }catch(Exception e) { throw new Tokenexception(MessageReference.INVALID_TOKEN); }
 		return  claim.getSubject();

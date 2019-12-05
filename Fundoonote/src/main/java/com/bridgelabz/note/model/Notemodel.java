@@ -35,9 +35,7 @@ public class Notemodel {
 	
 	
 	@Id
-	private String id;   
-	
-	
+	private String id;  	
 	private String title;  
 	private String  description;
 	private String color;
@@ -45,7 +43,7 @@ public class Notemodel {
 	private boolean trash;
 	private boolean archive;
 	private Date remider;	
-	private LocalDateTime date;	
+	private LocalDateTime date = LocalDateTime.now();	
 	private String userid;
 	private List<String > collabrators; //list use for collaborators other person
 	@JsonIgnore

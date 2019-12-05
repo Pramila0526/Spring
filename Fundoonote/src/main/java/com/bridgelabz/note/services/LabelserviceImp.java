@@ -20,14 +20,13 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import com.bridgelabz.note.dto.Labeldto;
 import com.bridgelabz.note.exception.custom.Labelnotfoundexception;
 import com.bridgelabz.note.exception.custom.Notenotfoundexception;
+import com.bridgelabz.note.exception.custom.Tokenexception;
 import com.bridgelabz.note.model.Labelmodel;
 import com.bridgelabz.note.model.Notemodel;
-
 import com.bridgelabz.note.repo.Labelrepository;
 import com.bridgelabz.note.repo.Noterepository;
 import com.bridgelabz.note.response.Response;
@@ -39,8 +38,6 @@ import com.bridgelabz.note.utility.Tokenutility;
  */
 @Component
 
-
-
 public class LabelserviceImp implements Labelservice {
 	static Logger logger = LoggerFactory.getLogger(LabelserviceImp.class);
 
@@ -48,10 +45,8 @@ public class LabelserviceImp implements Labelservice {
 	private ModelMapper mapper; // create modelmapper object
 	@Autowired
 	private Labelrepository labelRepo; // create lable repository object
-
 	@Autowired
 	private Noterepository noteRepo; // create Noterepository object
-
 	@Autowired
 	private Tokenutility tokenUtility; // create Tokenutility object
 
@@ -60,41 +55,39 @@ public class LabelserviceImp implements Labelservice {
 	 * 
 	 * @return
 	 */
-	
-	
 
-	@Cacheable(value = "labeldto", key = "#token")
+//	@Cacheable(value = "labeldto", key = "#token")
 	@Override
 	public Response labelAdd(Labeldto labeldto, String token) {
-        System.out.println("1");
-		Labelmodel labelmodel = mapper.map(labeldto, Labelmodel.class);
-		labelmodel.setLable_title(labeldto.getLable_title());
-		LocalDateTime datetime = LocalDateTime.now();
-		labelmodel.setCreated_date(datetime);
-		System.out.println("2");
-		String user_id = tokenUtility.getUserToken(token);
-		labelmodel.setUserid(user_id);
+		System.out.println(labeldto.getLable_title());
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		   
+		Labelmodel labelmodel = mapper.map(labeldto, Labelmodel.class);					
+		
+		labelmodel.setUserid(userid);
+		
+		   System.out.println(labelmodel.getLable_title());
 		labelRepo.save(labelmodel);
-		System.out.println("1");
-		return new Response(200, "lable add", MessageReference.LABEL_ADD_SUCCESSFULLY);
+		return new Response(200, MessageReference.LABEL_ADD_SUCCESSFULLY,true);
 
 	}
-	
-	
-	
-	
 
 	/**
 	 * purpose delete perticular label
 	 */
 
-	
 	@Override
-	public Response labelDelete(String id) {
+	public Response labelDelete(String labelid, String token) {
 
-		Optional<Labelmodel> label = labelRepo.findById(id);
-		System.out.println(label);
-		if (label.isEmpty()) {
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Optional<Labelmodel> id = labelRepo.findByIdAndUserid(labelid, userid);
+		if (id.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 		}
 
@@ -107,12 +100,18 @@ public class LabelserviceImp implements Labelservice {
 	 * purpose update perticular label
 	 */
 	@Override
-	public Response labelUpdate(Labeldto labeldto, String id) {
-		Labelmodel labelmodel = labelRepo.findById(id).get();
+	public Response labelUpdate(Labeldto labeldto, String labelid, String token) {
 
-		if (labelmodel == null) {
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Optional<Labelmodel> id = labelRepo.findByIdAndUserid(labelid, userid);
+
+		if (id.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 		}
+		Labelmodel labelmodel = id.get();
 		labelmodel.setLable_title(labeldto.getLable_title());
 		LocalDateTime datetime = LocalDateTime.now();
 		labelmodel.setUpdated_date(datetime);
@@ -127,9 +126,14 @@ public class LabelserviceImp implements Labelservice {
 	 * purpose show all user label
 	 */
 	@Override
-	public ArrayList<Labelmodel> labelShowAll() {
+	public ArrayList<Labelmodel> labelShowAll(String token) {
 
-		return (ArrayList<Labelmodel>) labelRepo.findAll();
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+
+		return (ArrayList<Labelmodel>) labelRepo.findByUserid(userid);
 
 	}
 
@@ -137,10 +141,14 @@ public class LabelserviceImp implements Labelservice {
 	 * purpose Search a perticular user label
 	 */
 	@Override
-	public Response labelSearch(String id) {
-		System.out.println("dddd");
-		Optional<Labelmodel> labelmodel = labelRepo.findById(id);
-		if (labelmodel.isEmpty()) {
+	public Response labelSearch(String labelid, String token) {
+
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
+		Optional<Labelmodel> id = labelRepo.findByIdAndUserid(labelid, userid);
+		if (id.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 		}
 		return new Response(200, "  user label ", labelRepo.findById(id));
@@ -150,29 +158,38 @@ public class LabelserviceImp implements Labelservice {
 	 * purpose find by user id for label
 	 */
 	@Override
-	public Response findLabelByUser_id(String user_id) {
+	public Response findLabelByUser_id(String user_id, String token) {
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
 
-		return new Response(200, "  user label ", labelRepo.findByUserid(user_id));
+		return new Response(200, "  user label ", labelRepo.findByUserid(userid));
 	}
 
 	/**
 	 * purpose main goal is relationship between label and note
 	 */
 	@Override
-	public Response manyToMany(String noteid, String labelid) {
-
+	public Response manyToMany(String noteid, String labelid, String token) {
+		String userid = tokenUtility.getUserToken(token);
+		if (userid.isEmpty()) {
+			throw new Tokenexception(MessageReference.INVALID_TOKEN);
+		}
 		List<Notemodel> notelist = new ArrayList<Notemodel>();
 		List<Labelmodel> labellist = new ArrayList<Labelmodel>();
-		Labelmodel label = labelRepo.findById(labelid).get(); // check label id present or not
-		if (label == null) {
+		Optional<Labelmodel> userlabelid = labelRepo.findById(labelid); // check label id present or not
+		if (userlabelid.isEmpty()) {
 			throw new Notenotfoundexception(MessageReference.NOTE_NOT_FOUND);
 
 		}
-		Notemodel note = noteRepo.findById(noteid).get(); // check note id present or not
-		if (note == null) {
+		Optional<Notemodel> usernoteid = noteRepo.findById(noteid); // check note id present or not
+		if (usernoteid.isEmpty()) {
 			throw new Labelnotfoundexception(MessageReference.LABEL_NOT_FOUND);
 
 		}
+		Labelmodel label = userlabelid.get();
+		Notemodel note = usernoteid.get();
 		labellist.add(label);
 		notelist.add(note);
 		label.setListOfNote(notelist);
