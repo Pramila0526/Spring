@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -34,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.bridgelabz.config.Passwordconfig;
 import com.bridgelabz.dto.Logindto;
@@ -50,8 +53,11 @@ import com.bridgelabz.repo.Userrepo;
 import com.bridgelabz.response.Response;
 import com.bridgelabz.utility.Tokenutility;
 import com.bridgelabz.utility.Utility;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 @Service
+@CacheConfig(cacheNames = "user")
 public class ServiceImp implements com.bridgelabz.services.Service {
 
 	static Logger logger = LoggerFactory.getLogger(ServiceImp.class);
@@ -83,11 +89,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * show user email already existing & password store encrypt format
 	 */
 
-//	@Value("${key}")
-//	private String key;
+
 	@Override
 	public Response addNewUser(@Valid Registerdto regdto) {
-            System.out.println(regdto.getEmail());
+		System.out.println(regdto.getEmail());
 		User user = mapper.map(regdto, User.class); // store new user data in mapper
 		if (repo.findAll().stream().anyMatch(i -> i.getEmail().equals(regdto.getEmail()))) // check user already
 																							// existing or not
@@ -108,9 +113,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		String token = tokenutility.createToken(user.getId());
 		Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
 		template.convertAndSend("userMessageQueue", body);
-		//javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
-	//	javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
-	//	MessageReference.REGISTRATION_MAIL_TEXT)); // send
+		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
+		// javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
+		// MessageReference.REGISTRATION_MAIL_TEXT)); // send
 		logger.isWarnEnabled();
 
 		// String gettoken = tokenutility.getUserToken(token);
@@ -147,8 +152,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * Purpose : login user though email id or password
 	 */
 
-	@Cacheable(value = "user", key = "#token")
-	@Override
+	
+	public static  String MY_KEY ="";
+	@Override	
+	@Cacheable(key = "#root.target.MY_KEY")
 	public Response loginUser(Logindto loginDTO) {
 		System.out.println("server");
 		System.out.println(loginDTO.getEmail());
@@ -158,7 +165,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			return new Response(200, "User Registrtion ", MessageReference.EMAIL_FAIL);
 
 		}
-		String token = tokenutility.getUserToken(user.getId());
+		String token = tokenutility.createToken(user.getId());
+	//	MY_KEY+=token;
+	//.out.println(MY_KEY);
 		if (!user.isValidate()) {
 
 			new Validateuserexception(MessageReference.NOT_ACTIVE);
@@ -194,8 +203,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 *
 	 */
 	@Override
+	@Cacheable(key = "#token")
 	public List<User> Show(String token) {
-
+		System.out.println("check");
 		return repo.findAll(); // show all user details in mongodb
 	}
 
@@ -304,29 +314,33 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		if (getUser.isEmpty()) {
 			throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
 		}
+		Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap("cloud_name", "dr3elpkt6", "api_key",
+				"734447837289933", "api_secret", "8e62pWlW-1i52pOVViWu6hOMAg0"));
 		User user = getUser.get();
 		if (user != null && userid != null) {
 			if (file.getOriginalFilename().contains(".jpg") || file.getOriginalFilename().contains(".png")
 					|| file.getOriginalFilename().contains(".jpeg")) {
 				if (!file.isEmpty()) {
-
-					File filepath = new File(
-							"/home/user/Documents/Springboot/Fundoouser/Profile/" + file.getOriginalFilename());
+					File filepath = new File("/home/user/Documents/Springboot/Fundoouser/Profile/" + file.getOriginalFilename());
+					String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+					Path getPath = Paths.get("/home/user/Documents/Springboot/Fundoouser/Profile/");
+					Path targetLocation = getPath.resolve(fileName);
+				    File toUpload = new File(targetLocation.toString());
+					Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+					System.out.println("toupload" + toUpload);
 					filepath.createNewFile();
 					FileOutputStream fo = new FileOutputStream(file.getOriginalFilename());
-					String pic = file.getOriginalFilename();
-					user.setProfile(pic);
-					System.out.println(file.getBytes());
+					Map uploadResult = cloudinary.uploader().upload(toUpload, ObjectUtils.emptyMap());
+					user.setProfile(uploadResult.get("secure_url").toString());
 					fo.write(file.getBytes());
 					repo.save(user);
 
+					return new Response(200,  MessageReference.PROFILE_ADD_SUCCESSFYLLY, uploadResult.get("secure_url").toString());
 				}
 			}
 		}
-
-		return new Response(200, "profile", MessageReference.USER_PROFILE_ADD);
+		return new Response(200, MessageReference.USER_ID_NOT_FOUND,true);
 	}
-
 	@Override
 	public Response deleteProfile(String profileName, String token) {
 		String userid = tokenutility.getUserToken(token);

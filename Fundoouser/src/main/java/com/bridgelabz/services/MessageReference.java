@@ -32,6 +32,7 @@ public class MessageReference {
     public static final String USER_DELETE_SUCCESSFULLY="User delete Succssfully";
     public static final String USER_UPDATE_SUCCESSFULLY="User update Succssfully";
     public static final String USER_ID_NOT_FOUND="Person could not be found with id ";
+    public static final String PROFILE_ADD_SUCCESSFYLLY=" profile add successfully";
     public static final String USER_NOT_EXISTING=" user not existing ";
     public static final String PASSWORD_CHANGE_SUCCESSFULLY="password Change  successfully";
     public static final String PASSWORD_NOT_CHANGE_SUCCESSFULLY="password not Change  successfully";

@@ -1,4 +1,4 @@
-package com.bridgelabz.note.config;
+package com.bridgelabz.config;
 
 import static springfox.documentation.builders.PathSelectors.regex;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,7 @@ public class SwaggerConfiguration {
 	       return new Docket(DocumentationType.SWAGGER_2)
 	        .select()
 	        
-	               .apis(RequestHandlerSelectors.basePackage("com.bridgelabz.note"))
+	               .apis(RequestHandlerSelectors.basePackage("com.bridgelabz"))
 	               .paths(regex("/.*"))
 	               .build();
 

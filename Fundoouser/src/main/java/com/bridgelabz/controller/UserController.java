@@ -104,7 +104,7 @@ public class UserController {
 	 * @return if user user name & password is match return success or not
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<Response> loginUser(@RequestBody Logindto logindto, @RequestParam String token) {
+	public ResponseEntity<Response> loginUser(@RequestBody Logindto logindto) {
 
 		return new ResponseEntity<Response>(serviceimp.loginUser(logindto), HttpStatus.OK);
 
@@ -151,7 +151,7 @@ public class UserController {
 	 */
 
 	@PostMapping(value = "/addprofile", consumes = "multipart/form-data")
-	public ResponseEntity<Response> addProfile(MultipartFile file, @RequestHeader String userid,
+	public ResponseEntity<Response> addProfile(MultipartFile file, 
 			@RequestHeader String token) throws IOException {
 		return new ResponseEntity<Response>(serviceimp.addProfile(file, token), HttpStatus.OK);
 	}

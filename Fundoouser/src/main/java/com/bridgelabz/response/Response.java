@@ -13,11 +13,17 @@
  ******************************************************************************/
 package com.bridgelabz.response;
 
+import java.io.Serializable;
+
 import lombok.Data;
 
 @Data
-public class Response {
+public class Response  implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6597721492410014185L;
 	private int status;          //create status integer for user response 
 	private String message;     // create message in String for give the user message
 	private Object data;        // create  data for give any information

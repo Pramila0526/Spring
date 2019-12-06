@@ -13,6 +13,8 @@
  ******************************************************************************/
 package com.bridgelabz.model;
 
+import java.io.Serializable;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,8 +24,12 @@ import lombok.Data;
 
 @Document
 @Data
-public class User {
+public class User implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3062820861321260332L;
 	@Id
 	private String id;
 	private String firstname;
