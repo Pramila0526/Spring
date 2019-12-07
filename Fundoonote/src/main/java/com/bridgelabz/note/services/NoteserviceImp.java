@@ -23,6 +23,10 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.bridgelabz.note.dto.Collabratordto;
 import com.bridgelabz.note.dto.Notedto;
@@ -35,6 +39,7 @@ import com.bridgelabz.note.response.Response;
 import com.bridgelabz.note.utility.Tokenutility;
 
 @Service
+@CacheConfig(cacheNames = "note")
 public class NoteserviceImp implements Noteservice {
 	static Logger logger = LoggerFactory.getLogger(LabelserviceImp.class);
 	@Autowired
@@ -54,6 +59,7 @@ public class NoteserviceImp implements Noteservice {
 	 *
 	 */
 	@Override
+	@Cacheable(key = "#token")
 	public Response createNote(Notedto notedto, String token) throws IOException {
 		
 		Notemodel notemodel = mapper.map(notedto, Notemodel.class);	    
@@ -68,17 +74,22 @@ public class NoteserviceImp implements Noteservice {
 	 * purpose delete perticular note
 	 */
 	@Override
+	@CacheEvict(key = "#token")
 	public Response deletePermanentNote(String noteid, String token) {
+		System.out.println("noteid  "+noteid+"token"+token);
 		String userid = tokenutility.getUserToken(token);
+		
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
+		
 		Optional<Notemodel> id = repo.findByIdAndUserid(noteid, userid);
-		Notemodel note_id = id.get();
+		System.out.println(id);
+//		Notemodel note_id = id.get();
 		if (id.isEmpty()) {
 			throw new Notenotfoundexception(MessageReference.NOTE_ID_NOT_FOUND);
 		}
-		repo.delete(note_id);
+		repo.delete(id.get());
 		return new Response(200, "note add", MessageReference.NOTE_DELETE_SUCCESSFULLY);
 
 	}

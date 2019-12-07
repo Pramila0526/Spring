@@ -151,8 +151,7 @@ public class UserController {
 	 */
 
 	@PostMapping(value = "/addprofile", consumes = "multipart/form-data")
-	public ResponseEntity<Response> addProfile(MultipartFile file, 
-			@RequestHeader String token) throws IOException {
+	public ResponseEntity<Response> addProfile(MultipartFile file, @RequestHeader String token) throws IOException {
 		return new ResponseEntity<Response>(serviceimp.addProfile(file, token), HttpStatus.OK);
 	}
 

@@ -77,10 +77,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	private Passwordconfig confing; // create object for confing
 
 	@Autowired
-	ModelMapper mapper; // user modelmapper for store data
+	private ModelMapper mapper; // user modelmapper for store data
 
 	@Autowired
-	RabbitTemplate template;
+	private RabbitTemplate template;
 	// private final String path =
 	// "/home/user/Documents/Springboot/Fundoouser/Profile/";
 
@@ -88,7 +88,6 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * purpose: add new user detail in database if user add already recored then
 	 * show user email already existing & password store encrypt format
 	 */
-
 
 	@Override
 	public Response addNewUser(@Valid Registerdto regdto) {
@@ -100,10 +99,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			throw new Registrationexcepton(MessageReference.EMAIL_ALREADY_REGISTERED);
 
 		}
-		user.setFirstname(regdto.getFirstname());
-		user.setLastname(regdto.getLastname());
-		user.setEmail(regdto.getEmail());
-		user.setPhonenumber(regdto.getPhonenumber());
+		
 		user.setPassword(passwordConfig.encode(regdto.getPassword()));
 		user = repo.save(user); // store user all detail in db
 		if (user == null) {
@@ -111,12 +107,12 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 
 		String token = tokenutility.createToken(user.getId());
-		Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
-		template.convertAndSend("userMessageQueue", body);
+	//	Rabbitmqmodel body = Utility.getRabbitMq(regdto.getEmail(), token);
+	//	template.convertAndSend("userMessageQueue", body);
 		// javaMailSender.send(Utility.getRabbitMq(regdto.getEmail(), token));
 		// javaMailSender.send(Utility.verifyUserMail(regdto.getEmail(), token,
 		// MessageReference.REGISTRATION_MAIL_TEXT)); // send
-		logger.isWarnEnabled();
+		//logger.isWarnEnabled();
 
 		// String gettoken = tokenutility.getUserToken(token);
 		// redisTemp.opsForValue().set(key, gettoken);
@@ -152,9 +148,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 * Purpose : login user though email id or password
 	 */
 
-	
-	public static  String MY_KEY ="";
-	@Override	
+	public static String MY_KEY = "";
+
+	@Override
 	@Cacheable(key = "#root.target.MY_KEY")
 	public Response loginUser(Logindto loginDTO) {
 		System.out.println("server");
@@ -166,8 +162,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 		}
 		String token = tokenutility.createToken(user.getId());
-	//	MY_KEY+=token;
-	//.out.println(MY_KEY);
+		// MY_KEY+=token;
+		// .out.println(MY_KEY);
 		if (!user.isValidate()) {
 
 			new Validateuserexception(MessageReference.NOT_ACTIVE);
@@ -203,7 +199,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	 *
 	 */
 	@Override
-	@Cacheable(key = "#token")
+	
 	public List<User> Show(String token) {
 		System.out.println("check");
 		return repo.findAll(); // show all user details in mongodb
@@ -321,11 +317,12 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			if (file.getOriginalFilename().contains(".jpg") || file.getOriginalFilename().contains(".png")
 					|| file.getOriginalFilename().contains(".jpeg")) {
 				if (!file.isEmpty()) {
-					File filepath = new File("/home/user/Documents/Springboot/Fundoouser/Profile/" + file.getOriginalFilename());
+					File filepath = new File(
+							"/home/user/Documents/Springboot/Fundoouser/Profile/" + file.getOriginalFilename());
 					String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 					Path getPath = Paths.get("/home/user/Documents/Springboot/Fundoouser/Profile/");
 					Path targetLocation = getPath.resolve(fileName);
-				    File toUpload = new File(targetLocation.toString());
+					File toUpload = new File(targetLocation.toString());
 					Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 					System.out.println("toupload" + toUpload);
 					filepath.createNewFile();
@@ -334,13 +331,14 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 					user.setProfile(uploadResult.get("secure_url").toString());
 					fo.write(file.getBytes());
 					repo.save(user);
-
-					return new Response(200,  MessageReference.PROFILE_ADD_SUCCESSFYLLY, uploadResult.get("secure_url").toString());
+					return new Response(200, MessageReference.PROFILE_ADD_SUCCESSFYLLY,
+							uploadResult.get("secure_url").toString());
 				}
 			}
 		}
-		return new Response(200, MessageReference.USER_ID_NOT_FOUND,true);
+		return new Response(200, MessageReference.USER_ID_NOT_FOUND, true);
 	}
+
 	@Override
 	public Response deleteProfile(String profileName, String token) {
 		String userid = tokenutility.getUserToken(token);
@@ -353,7 +351,6 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 		User user = getUser.get();
 		if (userid != null && user != null) {
-
 			File filepath = new File("/home/user/Documents/Springboot/Fundoouser/Profile/" + profileName);
 			System.out.println(filepath);
 			filepath.delete();
@@ -372,19 +369,15 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 			throw new Registrationexcepton(MessageReference.USER_ID_NOT_FOUND);
 		}
 		User user = id.get();
-
 		String filepath = user.getProfile();
 		String path = "/homeuser/Documents/Springboot/Fundoouser/Profile/" + filepath;
-		System.out.println("1");
 		Path filePath = Paths.get(path);
-		System.out.println("2");
 		Resource resource = new UrlResource(filePath.toUri());
-		System.out.println("3");
 		String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-		System.out.println("4");
+
 		if (contentType == null)
 			contentType = "application/octate-stream";
-		System.out.println("5");
+
 		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + resource.getFilename() + "\"")
 				.body(resource);

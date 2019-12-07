@@ -59,7 +59,7 @@ public class LabelserviceImp implements Labelservice {
 //	@Cacheable(value = "labeldto", key = "#token")
 	@Override
 	public Response labelAdd(Labeldto labeldto, String token) {
-		System.out.println(labeldto.getLable_title());
+	
 		String userid = tokenUtility.getUserToken(token);
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
@@ -69,7 +69,7 @@ public class LabelserviceImp implements Labelservice {
 		
 		labelmodel.setUserid(userid);
 		
-		   System.out.println(labelmodel.getLable_title());
+		   
 		labelRepo.save(labelmodel);
 		return new Response(200, MessageReference.LABEL_ADD_SUCCESSFULLY,true);
 
@@ -81,7 +81,6 @@ public class LabelserviceImp implements Labelservice {
 
 	@Override
 	public Response labelDelete(String labelid, String token) {
-
 		String userid = tokenUtility.getUserToken(token);
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
@@ -142,8 +141,9 @@ public class LabelserviceImp implements Labelservice {
 	 */
 	@Override
 	public Response labelSearch(String labelid, String token) {
-
+        System.out.println(labelid+"token="+token);
 		String userid = tokenUtility.getUserToken(token);
+		System.out.println("token: "+userid);
 		if (userid.isEmpty()) {
 			throw new Tokenexception(MessageReference.INVALID_TOKEN);
 		}
