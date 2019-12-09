@@ -6604,3 +6604,4 @@ Caused by: java.lang.IllegalArgumentException: Database name must not contain sl
 2019-12-07 19:06:30.336  INFO 11782 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
 2019-12-07 19:06:30.338  INFO 11782 --- [restartedMain] c.bridgelabz.note.FundoonoteApplication  : Started FundoonoteApplication in 4.987 seconds (JVM running for 30663.005)
 2019-12-07 19:06:30.341  INFO 11782 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2019-12-07 19:18:36.540  INFO 11782 --- [SpringContextShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'

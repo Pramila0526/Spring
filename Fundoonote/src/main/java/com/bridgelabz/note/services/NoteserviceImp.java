@@ -199,7 +199,7 @@ public class NoteserviceImp implements Noteservice {
 		}
 		Notemodel note = id.get();
 
-		 System.out.println(collabratorDto.getColaboratorId());
+		
 		List<String> list = new ArrayList<String>();
 		list = note.getCollabrators();
 		list.add(collabratorDto.getColaboratorId());

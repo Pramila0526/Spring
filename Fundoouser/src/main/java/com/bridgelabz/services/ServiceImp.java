@@ -91,8 +91,9 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 	@Override
 	public Response addNewUser(@Valid Registerdto regdto) {
-		System.out.println(regdto.getEmail());
+	
 		User user = mapper.map(regdto, User.class); // store new user data in mapper
+		System.out.println(user.getFirstname());
 		if (repo.findAll().stream().anyMatch(i -> i.getEmail().equals(regdto.getEmail()))) // check user already
 																							// existing or not
 		{
@@ -101,6 +102,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		}
 		
 		user.setPassword(passwordConfig.encode(regdto.getPassword()));
+		System.out.println(user);
 		user = repo.save(user); // store user all detail in db
 		if (user == null) {
 			throw new Registrationexcepton(MessageReference.EMAIL_FAIL);
@@ -114,8 +116,8 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 		// MessageReference.REGISTRATION_MAIL_TEXT)); // send
 		//logger.isWarnEnabled();
 
-		// String gettoken = tokenutility.getUserToken(token);
-		// redisTemp.opsForValue().set(key, gettoken);
+	
+	
 
 		return new Response(200, "User Registrtion ", MessageReference.USER_ADD_SUCCESSFULLY);
 	}
@@ -151,10 +153,10 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 	public static String MY_KEY = "";
 
 	@Override
-	@Cacheable(key = "#root.target.MY_KEY")
+	//@Cacheable(key = "#root.target.MY_KEY")
 	public Response loginUser(Logindto loginDTO) {
-		System.out.println("server");
-		System.out.println(loginDTO.getEmail());
+		
+		
 		User user = repo.findByEmail(loginDTO.getEmail()); // find email present or not
 		System.out.println(user);
 		if (user == null) {
@@ -162,8 +164,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 		}
 		String token = tokenutility.createToken(user.getId());
-		// MY_KEY+=token;
-		// .out.println(MY_KEY);
+		
 		if (!user.isValidate()) {
 
 			new Validateuserexception(MessageReference.NOT_ACTIVE);
@@ -283,7 +284,7 @@ public class ServiceImp implements com.bridgelabz.services.Service {
 
 		String userid = tokenutility.getUserToken(token);
 		String email = repo.findById(userid).get().getEmail(); // find user email present or not
-		System.out.println(email);
+		
 		User updateuser = repo.findByEmail(email);
 		if (setPasswordDto.getPassword().equals(setPasswordDto.getCfmpassword())) { // check password or cfmpassword
 
